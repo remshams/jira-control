@@ -1,5 +1,9 @@
 package issue_worklog
 
+type WorklogAdapter interface {
+	logWork(worklog Worklog) error
+}
+
 type Worklog struct {
 	issueKey   string
 	hoursSpent float64
