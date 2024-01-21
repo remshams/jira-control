@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/log"
-	"github.com/remshams/common/logger"
+	"github.com/remshams/common/utils/logger"
 )
 
 func main() {
