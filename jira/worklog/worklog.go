@@ -5,13 +5,19 @@ type WorklogAdapter interface {
 }
 
 type Worklog struct {
+	adapter    WorklogAdapter
 	issueKey   string
 	hoursSpent float64
 }
 
-func NewWorklog(issueKey string, hoursSpent float64) Worklog {
+func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Worklog {
 	return Worklog{
+		adapter:    adapter,
 		issueKey:   issueKey,
 		hoursSpent: hoursSpent,
 	}
+}
+
+func (w Worklog) Log() error {
+	return (w.adapter).logWork(w)
 }
