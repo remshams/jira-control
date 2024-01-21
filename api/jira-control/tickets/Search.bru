@@ -1,0 +1,23 @@
+meta {
+  name: Search
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://{{url}}/rest/api/2/search
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
+
+body:json {
+  {
+    "jql": "project = 'NXNXTUI' AND summary ~ 'Project Management'",
+    "fields":["id","key","summary", "assignee"]
+  }
+}

@@ -1,0 +1,16 @@
+meta {
+  name: All
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://{{url}}/rest/api/2/project
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
