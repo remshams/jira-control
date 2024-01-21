@@ -1,14 +1,13 @@
 package issue_worklog
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/charmbracelet/log"
-	dc_http "github.com/remshams/common/utils/http"
+	"github.com/remshams/common/utils/http"
 )
 
 const path = "rest/api/3/issue/%s/worklog"
@@ -49,13 +48,13 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 	if err != nil {
 		return err
 	}
-	headers := []dc_http.HttpHeader{
+	headers := []utils_http.HttpHeader{
 		{
-			Type:  dc_http.ContentType,
+			Type:  utils_http.ContentType,
 			Value: "application/json",
 		},
 	}
-	_, err = dc_http.PerformRequest(
+	_, err = utils_http.PerformRequest(
 		"Worklog",
 		path.String(),
 		http.MethodPost,
