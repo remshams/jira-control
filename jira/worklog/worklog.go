@@ -18,6 +18,10 @@ func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Wor
 	}
 }
 
+func (worklog Worklog) hours() float64 {
+	return worklog.hoursSpent
+}
+
 func (w Worklog) Log() error {
 	return (w.adapter).logWork(w)
 }
