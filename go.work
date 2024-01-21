@@ -1,3 +1,6 @@
 go 1.21.3
 
-use ./jira
+use (
+	./_common
+	./jira
+)

@@ -1,0 +1,3 @@
+[submodule "common"]
+	path = _common
+	url = ssh://soft/go-common.git

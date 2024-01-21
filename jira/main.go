@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/remshams/common/logger"
+)
 
 func main() {
+	logger.PrepareLogger()
 	fmt.Println("Hello, World!")
 }
