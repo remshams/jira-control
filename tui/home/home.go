@@ -9,17 +9,20 @@ import (
 	"github.com/remshams/common/tui/bubbles/help"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
+	worklog_log "github.com/remshams/jira-control/tui/worklog/log"
 )
 
 type Model struct {
-	toast toast.Model
-	help  help.Model
+	toast   toast.Model
+	help    help.Model
+	worklog worklog_log.Model
 }
 
 func New() Model {
 	return Model{
-		toast: toast.New(),
-		help:  help.New(),
+		toast:   toast.New(),
+		help:    help.New(),
+		worklog: worklog_log.New(),
 	}
 }
 
@@ -42,7 +45,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	return fmt.Sprintf(
-		"Jira home\n%s\n%s",
+		"%s\n%s\n%s",
+		m.worklog.View(),
 		m.renderHelp(),
 		m.renderToast(),
 	)
