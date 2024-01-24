@@ -1,23 +1,25 @@
-package worklog_log
+package worklog
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/remshams/common/tui/bubbles/cursor"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	"github.com/remshams/common/tui/utils"
-)
-
-const (
-	issue utils.ViewState = "issue"
+	"github.com/remshams/common/tui/bubbles/textinput"
 )
 
 type Model struct {
-	issueKey string
-	state    utils.ViewState
+	issueKey textinput.Model
+	work     textinput.Model
+	comment  textinput.Model
+	cursor   cursor.CursorState
 }
 
 func New() Model {
 	return Model{
-		issueKey: "",
+		issueKey: textinput.New("Issue key", ""),
+		work:     textinput.New("Work", ""),
+		comment:  textinput.New("Comment", ""),
+		cursor:   cursor.New(1),
 	}
 }
 

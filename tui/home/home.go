@@ -10,14 +10,14 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
-	worklog_log "github.com/remshams/jira-control/tui/worklog/log"
+	"github.com/remshams/jira-control/tui/worklog"
 )
 
 type Model struct {
 	title   title.Model
 	toast   toast.Model
 	help    help.Model
-	worklog worklog_log.Model
+	worklog worklog.Model
 }
 
 func New() Model {
@@ -25,7 +25,7 @@ func New() Model {
 		title:   title.New(),
 		toast:   toast.New(),
 		help:    help.New(),
-		worklog: worklog_log.New(),
+		worklog: worklog.New(),
 	}
 }
 
