@@ -10,6 +10,7 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
+	common "github.com/remshams/jira-control/tui/_common"
 	"github.com/remshams/jira-control/tui/worklog"
 )
 
@@ -41,8 +42,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, GlobalKeys.Quit):
+		case key.Matches(msg, common.GlobalKeys.Quit):
 			cmd = tea.Quit
+		default:
+			m.worklog, cmd = m.worklog.Update(msg)
 		}
 	}
 	return m, cmd

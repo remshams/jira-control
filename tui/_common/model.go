@@ -1,4 +1,4 @@
-package home
+package common
 
 import "github.com/charmbracelet/bubbles/key"
 
