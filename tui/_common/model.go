@@ -8,7 +8,7 @@ type GlobalKeyMap struct {
 
 var GlobalKeys = GlobalKeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", "esc", "ctrl+c"),
-		key.WithHelp("q/esc/C-c", "Quit"),
+		key.WithKeys("q", "ctrl+c"),
+		key.WithHelp("q/C-c", "Quit"),
 	),
 }
