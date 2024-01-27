@@ -84,6 +84,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 		} else {
 			switch {
+			case key.Matches(msg, worklogKeys.textinput.Apply):
+				cmd = m.updateSelection(msg)
+				m.state = navigate
 			case key.Matches(msg, worklogKeys.textinput.Discard):
 				cmd = m.updateSelection(msg)
 				m.state = navigate
@@ -106,7 +109,6 @@ func (m *Model) updateSelection(msg tea.Msg) tea.Cmd {
 		m.comment, cmd = m.comment.Update(msg)
 	}
 	return cmd
-
 }
 
 func (m Model) View() string {
