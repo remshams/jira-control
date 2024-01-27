@@ -11,18 +11,21 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/textinput"
 	"github.com/remshams/common/tui/styles"
+	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
 )
 
 type keyMap struct {
-	global common.GlobalKeyMap
-	cursor cursor.KeyMap
+	global    common.GlobalKeyMap
+	cursor    cursor.KeyMap
+	textinput textinput.KeyMap
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
 		k.cursor.Up,
 		k.cursor.Down,
+		textinput.TextInputKeyMap.Edit,
 		k.global.Quit,
 	}
 }
@@ -31,9 +34,15 @@ func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{}
 }
 
+const (
+	navigate utils.ViewState = "navigate"
+	edit     utils.ViewState = "edit"
+)
+
 var worklogKeys = keyMap{
-	cursor: cursor.CursorKeyMap,
-	global: common.GlobalKeys,
+	cursor:    cursor.CursorKeyMap,
+	global:    common.GlobalKeys,
+	textinput: textinput.TextInputKeyMap,
 }
 
 type Model struct {
@@ -41,6 +50,7 @@ type Model struct {
 	work     textinput.Model
 	comment  textinput.Model
 	cursor   cursor.CursorState
+	state    utils.ViewState
 }
 
 func New() Model {
@@ -49,6 +59,7 @@ func New() Model {
 		work:     textinput.New("Work", ""),
 		comment:  textinput.New("Comment", ""),
 		cursor:   cursor.New(3),
+		state:    navigate,
 	}
 }
 
@@ -63,9 +74,39 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		m.cursor = m.cursor.Update(msg)
+		if m.state == navigate {
+			switch {
+			case key.Matches(msg, worklogKeys.textinput.Edit):
+				cmd = m.updateSelection(msg)
+				m.state = edit
+			default:
+				m.cursor = m.cursor.Update(msg)
+			}
+		} else {
+			switch {
+			case key.Matches(msg, worklogKeys.textinput.Discard):
+				cmd = m.updateSelection(msg)
+				m.state = navigate
+			default:
+				cmd = m.updateSelection(msg)
+			}
+		}
 	}
 	return m, cmd
+}
+
+func (m *Model) updateSelection(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch m.cursor.Index() {
+	case 0:
+		m.issueKey, cmd = m.issueKey.Update(msg)
+	case 1:
+		m.work, cmd = m.work.Update(msg)
+	case 2:
+		m.comment, cmd = m.comment.Update(msg)
+	}
+	return cmd
+
 }
 
 func (m Model) View() string {
