@@ -2,6 +2,7 @@ package worklog
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -10,15 +11,29 @@ import (
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/textinput"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
+	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
+	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
 type keyMap struct {
 	global    common.GlobalKeyMap
 	cursor    cursor.KeyMap
 	textinput textinput.KeyMap
+	save      key.Binding
+}
+
+var worklogKeys = keyMap{
+	global:    common.GlobalKeys,
+	cursor:    cursor.CursorKeyMap,
+	textinput: textinput.TextInputKeyMap,
+	save: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "save"),
+	),
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -26,6 +41,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.cursor.Up,
 		k.cursor.Down,
 		textinput.TextInputKeyMap.Edit,
+		k.save,
 		k.global.Quit,
 	}
 }
@@ -39,13 +55,8 @@ const (
 	edit     utils.ViewState = "edit"
 )
 
-var worklogKeys = keyMap{
-	cursor:    cursor.CursorKeyMap,
-	global:    common.GlobalKeys,
-	textinput: textinput.TextInputKeyMap,
-}
-
 type Model struct {
+	adapter  tui_jira.JiraAdapter
 	issueKey textinput.Model
 	work     textinput.Model
 	comment  textinput.Model
@@ -53,8 +64,9 @@ type Model struct {
 	state    utils.ViewState
 }
 
-func New() Model {
+func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
+		adapter:  adapter,
 		issueKey: textinput.New("Issue key", ""),
 		work:     textinput.New("Work", ""),
 		comment:  textinput.New("Comment", ""),
@@ -79,6 +91,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			case key.Matches(msg, worklogKeys.textinput.Edit):
 				cmd = m.updateSelection(msg)
 				m.state = edit
+			case key.Matches(msg, worklogKeys.save):
+				cmd = m.logWorkInJira()
 			default:
 				m.cursor = m.cursor.Update(msg)
 			}
@@ -109,6 +123,19 @@ func (m *Model) updateSelection(msg tea.Msg) tea.Cmd {
 		m.comment, cmd = m.comment.Update(msg)
 	}
 	return cmd
+}
+
+func (m *Model) logWorkInJira() tea.Cmd {
+	hoursSpent, err := strconv.ParseFloat(m.work.Input.Value(), 64)
+	if err != nil {
+		return toast.CreateErrorToastAction("Invalid work value")
+	}
+	worklog := jira.NewWorklog(m.adapter.WorklogAdapter, m.issueKey.Input.Value(), hoursSpent)
+	err = worklog.Log()
+	if err != nil {
+		return toast.CreateErrorToastAction("Could not save worklog in jira")
+	}
+	return toast.CreateSuccessToastAction("Worklog updated")
 }
 
 func (m Model) View() string {

@@ -11,22 +11,24 @@ import (
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	common "github.com/remshams/jira-control/tui/_common"
+	tui_jira "github.com/remshams/jira-control/tui/jira"
 	"github.com/remshams/jira-control/tui/worklog"
 )
 
 type Model struct {
+	adapter tui_jira.JiraAdapter
 	title   title.Model
 	toast   toast.Model
 	help    help.Model
 	worklog worklog.Model
 }
 
-func New() Model {
+func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		title:   title.New(),
 		toast:   toast.New(),
 		help:    help.New(),
-		worklog: worklog.New(),
+		worklog: worklog.New(adapter),
 	}
 }
 
