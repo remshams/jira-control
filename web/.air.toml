@@ -1,0 +1,7 @@
+root = "." # Project root directory (required)
+tmp_dir = "tmp" # Temp directory (default is .air.tmp)
+build_cmd = "go build -o ./tmp/main ./*.go" # Build command (required)
+binary = "./tmp/main" # Binary to run (required)
+clear_delay = 1000 # Delay to clear the screen in milliseconds (default is 120)
+include_ext = ["go", "tmpl", "tpl", "html"] # Extensions to watch
+exclude_dir = ["tmp", "vendor"] # Directories to exclude
