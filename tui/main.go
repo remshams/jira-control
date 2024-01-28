@@ -20,8 +20,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer f.Close()
-	jiraAdapter := tui_jira.NewJiraAdapter(jira.NewWorklogMockAdapter())
-	p := tea.NewProgram(home.New(jiraAdapter))
+	jiraAdapter, err := jira.PrepareApplication()
+	if err != nil {
+		fmt.Println("fatal:", err)
+		os.Exit(1)
+	}
+	tuiJiraAdapter := tui_jira.NewJiraAdapter(jiraAdapter)
+	p := tea.NewProgram(home.New(tuiJiraAdapter))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
