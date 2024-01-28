@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
 	jira "github.com/remshams/jira-control/jira/public"
 	"github.com/remshams/jira-control/tui/home"
