@@ -2,9 +2,11 @@ package issue_worklog
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/http"
@@ -32,13 +34,30 @@ func (worklogDto worklogDto) toJson() ([]byte, error) {
 }
 
 type WorklogJiraAdapter struct {
-	url url.URL
+	url      url.URL
+	apiToken string
 }
 
-func New(url url.URL) WorklogJiraAdapter {
+func NewWorklogJiraAdapter(url url.URL, apiToken string) WorklogJiraAdapter {
 	return WorklogJiraAdapter{
-		url: url,
+		url:      url,
+		apiToken: apiToken,
 	}
+}
+
+func WorklogJiraAdapterFromEnv() (*WorklogJiraAdapter, error) {
+	url, err := url.Parse(os.Getenv("JIRA_URL"))
+	if err != nil || url.String() == "" {
+		log.Errorf("WorklogJiraAdapter: JIRA_URL not set or invalid: %v", err)
+		return nil, errors.New("JIRA_URL not set or invalid")
+	}
+	apiToken := os.Getenv("JIRA_API_TOKEN")
+	if apiToken == "" {
+		log.Errorf("WorklogJiraAdapter: JIRA_API_TOKEN is not set")
+		return nil, errors.New("JIRA_API_TOKEN is not set")
+	}
+	adapter := NewWorklogJiraAdapter(*url, apiToken)
+	return &adapter, nil
 }
 
 func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
@@ -52,6 +71,10 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 		{
 			Type:  utils_http.ContentType,
 			Value: "application/json",
+		},
+		{
+			Type:  utils_http.Authorization,
+			Value: fmt.Sprintf("Bearer %s", w.apiToken),
 		},
 	}
 	_, err = utils_http.PerformRequest(
