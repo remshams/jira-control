@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
@@ -11,17 +10,11 @@ import (
 
 func main() {
 	logger.PrepareLogger()
-	isProduction, err := strconv.ParseBool(os.Getenv("IS_PRODUCTION"))
+	jiraAdapter, err := issue_worklog.WorklogJiraAdapterFromEnv()
 	if err != nil {
-		log.Debug("IS_PRODUCTION is not set, defaulting to false")
-		isProduction = false
+		log.Errorf("Could not create JiraAdapter: %v", err)
+		os.Exit(1)
 	}
-	var worklogAdapter issue_worklog.WorklogAdapter
-	if isProduction == true {
-		worklogAdapter = issue_worklog.WorklogJiraAdapter{}
-	} else {
-		worklogAdapter = issue_worklog.WorklogMockAdatpter{}
-	}
-	worklog := issue_worklog.NewWorklog(worklogAdapter, "NC-40", 4.5)
+	worklog := issue_worklog.NewWorklog(jiraAdapter, "NC-40", 4.5)
 	worklog.Log()
 }
