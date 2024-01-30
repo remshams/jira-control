@@ -1,0 +1,20 @@
+meta {
+  name: Log work
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://{{url}}/rest/api/3/issue/{{issue}}/worklog
+  body: none
+  auth: basic
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
