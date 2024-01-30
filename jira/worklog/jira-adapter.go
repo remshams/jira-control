@@ -74,7 +74,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 		},
 		{
 			Type:  utils_http.Authorization,
-			Value: fmt.Sprintf("Bearer %s", w.apiToken),
+			Value: fmt.Sprintf("Basic %s", w.apiToken),
 		},
 	}
 	_, err = utils_http.PerformRequest(
