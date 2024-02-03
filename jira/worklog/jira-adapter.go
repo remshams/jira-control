@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
-	"github.com/remshams/common/utils/http"
+	utils_http "github.com/remshams/common/utils/http"
 )
 
 const path = "rest/api/3/issue/%s/worklog"
@@ -35,12 +35,14 @@ func (worklogDto worklogDto) toJson() ([]byte, error) {
 
 type WorklogJiraAdapter struct {
 	url      url.URL
+	username string
 	apiToken string
 }
 
-func NewWorklogJiraAdapter(url url.URL, apiToken string) WorklogJiraAdapter {
+func NewWorklogJiraAdapter(url url.URL, username string, apiToken string) WorklogJiraAdapter {
 	return WorklogJiraAdapter{
 		url:      url,
+		username: username,
 		apiToken: apiToken,
 	}
 }
@@ -51,12 +53,17 @@ func WorklogJiraAdapterFromEnv() (*WorklogJiraAdapter, error) {
 		log.Errorf("WorklogJiraAdapter: JIRA_URL not set or invalid: %v", err)
 		return nil, errors.New("JIRA_URL not set or invalid")
 	}
+	username := os.Getenv("JIRA_USERNAME")
+	if username == "" {
+		log.Errorf("WorklogJiraAdapter: JIRA_USERNAME is not set")
+		return nil, errors.New("JIRA_USERNAME is not set")
+	}
 	apiToken := os.Getenv("JIRA_API_TOKEN")
 	if apiToken == "" {
 		log.Errorf("WorklogJiraAdapter: JIRA_API_TOKEN is not set")
 		return nil, errors.New("JIRA_API_TOKEN is not set")
 	}
-	adapter := NewWorklogJiraAdapter(*url, apiToken)
+	adapter := NewWorklogJiraAdapter(*url, username, apiToken)
 	return &adapter, nil
 }
 
@@ -72,10 +79,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 			Type:  utils_http.ContentType,
 			Value: "application/json",
 		},
-		{
-			Type:  utils_http.Authorization,
-			Value: fmt.Sprintf("Basic %s", w.apiToken),
-		},
+		utils_http.CreateBasicAuthHeader(w.username, w.apiToken),
 	}
 	_, err = utils_http.PerformRequest(
 		"Worklog",
