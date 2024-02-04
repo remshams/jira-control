@@ -30,6 +30,8 @@ func PrepareApplication() (issue_worklog.WorklogAdapter, error) {
 	if err != nil {
 		log.Debug("IS_PRODUCTION is not set, defaulting to false")
 		isProduction = false
+	} else {
+		log.Debugf("IS_PRODUCTION is set to %v", isProduction)
 	}
 	var worklogAdapter issue_worklog.WorklogAdapter
 	if isProduction == true {
