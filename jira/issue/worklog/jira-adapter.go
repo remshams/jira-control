@@ -65,7 +65,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 		},
 		utils_http.CreateBasicAuthHeader(w.username, w.apiToken),
 	}
-	_, err = utils_http.PerformRequest(
+	_, _, err = utils_http.PerformRequest(
 		"Worklog",
 		path.String(),
 		http.MethodPost,
