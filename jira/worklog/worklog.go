@@ -27,14 +27,6 @@ func (worklog *Worklog) withStart(start time.Time) *Worklog {
 	return worklog
 }
 
-func (worklog Worklog) hours() float64 {
-	return worklog.hoursSpent
-}
-
-func (worklog Worklog) getHours() time.Time {
-	return worklog.start
-}
-
 func (w Worklog) Log() error {
 	return (w.adapter).logWork(w)
 }

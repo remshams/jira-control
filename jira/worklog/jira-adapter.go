@@ -22,8 +22,8 @@ type worklogDto struct {
 
 func worklogDtoFromWorklog(worklog Worklog) worklogDto {
 	return worklogDto{
-		TimeSpent: fmt.Sprintf("%fh", worklog.hours()),
-		Start:     worklog.getHours().Format(time.RFC3339),
+		TimeSpent: fmt.Sprintf("%fh", worklog.hoursSpent),
+		Start:     worklog.start.Format(time.RFC3339),
 	}
 }
 
