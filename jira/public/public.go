@@ -1,10 +1,7 @@
 package jira
 
 import (
-	"os"
-	"strconv"
-
-	"github.com/charmbracelet/log"
+	"github.com/remshams/jira-control/jira/app"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
 
@@ -12,6 +9,7 @@ type Worklog = issue_worklog.Worklog
 type WorklogAdapter = issue_worklog.WorklogAdapter
 type WorklogMockAdapter = issue_worklog.WorklogMockAdatpter
 type WorklogJiraAdapter = issue_worklog.WorklogJiraAdapter
+type App = app.App
 
 func NewWorklogJiraAdapter() WorklogJiraAdapter {
 	return issue_worklog.WorklogJiraAdapter{}
@@ -25,23 +23,6 @@ func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Wor
 	return issue_worklog.NewWorklog(adapter, issueKey, hoursSpent)
 }
 
-func PrepareApplication() (issue_worklog.WorklogAdapter, error) {
-	isProduction, err := strconv.ParseBool(os.Getenv("IS_PRODUCTION"))
-	if err != nil {
-		log.Debug("IS_PRODUCTION is not set, defaulting to false")
-		isProduction = false
-	} else {
-		log.Debugf("IS_PRODUCTION is set to %v", isProduction)
-	}
-	var worklogAdapter issue_worklog.WorklogAdapter
-	if isProduction == true {
-		worklogAdapter, err = issue_worklog.WorklogJiraAdapterFromEnv()
-		if err != nil {
-			log.Errorf("Could not create JiraAdapter: %v", err)
-			return nil, err
-		}
-	} else {
-		worklogAdapter = issue_worklog.WorklogMockAdatpter{}
-	}
-	return worklogAdapter, nil
+func PrepareApplication() (*app.App, error) {
+	return app.AppFromEnv()
 }

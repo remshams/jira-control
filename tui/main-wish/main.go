@@ -68,12 +68,12 @@ func main() {
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	issueWorklogAdapter, err := jira.PrepareApplication()
+	app, err := jira.PrepareApplication()
 	if err != nil {
 		fmt.Println("fatal:", err)
 		os.Exit(1)
 	}
-	jiraAdapter := tui_jira.NewJiraAdapter(issueWorklogAdapter)
+	jiraAdapter := tui_jira.NewJiraAdapter(app.IssueWorklogAdapter)
 	m := home.New(jiraAdapter)
 	return m, []tea.ProgramOption{tea.WithAltScreen()}
 }

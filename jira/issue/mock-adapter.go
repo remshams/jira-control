@@ -2,6 +2,10 @@ package issue
 
 type MockIssueAdapter struct{}
 
+func NewMockIssueAdapter() MockIssueAdapter {
+	return MockIssueAdapter{}
+}
+
 func (m MockIssueAdapter) searchIssues(request IssueSearchRequest) ([]Issue, error) {
 	return []Issue{
 		NewIssue("1", NewIssueProject("1", "P1", "Project 1"), "KEY-1", "Summary 1"),

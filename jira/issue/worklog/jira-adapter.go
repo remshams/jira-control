@@ -2,11 +2,9 @@ package issue_worklog
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
@@ -51,26 +49,6 @@ func NewWorklogJiraAdapter(url url.URL, username string, apiToken string) Worklo
 		username: username,
 		apiToken: apiToken,
 	}
-}
-
-func WorklogJiraAdapterFromEnv() (*WorklogJiraAdapter, error) {
-	url, err := url.Parse(os.Getenv("JIRA_URL"))
-	if err != nil || url.String() == "" {
-		log.Errorf("WorklogJiraAdapter: JIRA_URL not set or invalid: %v", err)
-		return nil, errors.New("JIRA_URL not set or invalid")
-	}
-	username := os.Getenv("JIRA_USERNAME")
-	if username == "" {
-		log.Errorf("WorklogJiraAdapter: JIRA_USERNAME is not set")
-		return nil, errors.New("JIRA_USERNAME is not set")
-	}
-	apiToken := os.Getenv("JIRA_API_TOKEN")
-	if apiToken == "" {
-		log.Errorf("WorklogJiraAdapter: JIRA_API_TOKEN is not set")
-		return nil, errors.New("JIRA_API_TOKEN is not set")
-	}
-	adapter := NewWorklogJiraAdapter(*url, username, apiToken)
-	return &adapter, nil
 }
 
 func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
