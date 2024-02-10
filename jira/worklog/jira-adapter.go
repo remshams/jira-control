@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
@@ -16,11 +17,13 @@ const path = "rest/api/3/issue/%s/worklog"
 
 type worklogDto struct {
 	TimeSpent string `json:"timeSpent"`
+	Start     string `json:"started,omitempty"`
 }
 
 func worklogDtoFromWorklog(worklog Worklog) worklogDto {
 	return worklogDto{
 		TimeSpent: fmt.Sprintf("%fh", worklog.hours()),
+		Start:     worklog.getHours().Format(time.RFC3339),
 	}
 }
 
