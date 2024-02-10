@@ -3,6 +3,7 @@ package worklog
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -59,6 +60,7 @@ type Model struct {
 	adapter  tui_jira.JiraAdapter
 	issueKey textinput.Model
 	work     textinput.Model
+	start    textinput.Model
 	comment  textinput.Model
 	cursor   cursor.CursorState
 	state    utils.ViewState
@@ -69,8 +71,9 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		adapter:  adapter,
 		issueKey: textinput.New("Issue key", ""),
 		work:     textinput.New("Work", ""),
+		start:    textinput.New("Start", ""),
 		comment:  textinput.New("Comment", ""),
-		cursor:   cursor.New(3),
+		cursor:   cursor.New(4),
 		state:    navigate,
 	}
 }
@@ -120,6 +123,8 @@ func (m *Model) updateSelection(msg tea.Msg) tea.Cmd {
 	case 1:
 		m.work, cmd = m.work.Update(msg)
 	case 2:
+		m.start, cmd = m.start.Update(msg)
+	case 3:
 		m.comment, cmd = m.comment.Update(msg)
 	}
 	return cmd
@@ -131,6 +136,20 @@ func (m *Model) logWorkInJira() tea.Cmd {
 		return toast.CreateErrorToastAction("Invalid work value")
 	}
 	worklog := jira.NewWorklog(m.adapter.WorklogAdapter, m.issueKey.Input.Value(), hoursSpent)
+	worklog.Description = m.comment.Input.Value()
+	if m.start.Input.Value() != "" {
+		// Currently only date is supported as start
+		worklog.Start, err = time.Parse(
+			time.RFC3339,
+			fmt.Sprintf(
+				"%sT%sZ",
+				m.start.Input.Value(),
+				time.Now().Format("15:04:05")),
+		)
+	}
+	if err != nil {
+		return toast.CreateErrorToastAction("Invalid start time")
+	}
 	err = worklog.Log()
 	if err != nil {
 		return toast.CreateErrorToastAction("Could not save worklog in jira")
@@ -141,9 +160,10 @@ func (m *Model) logWorkInJira() tea.Cmd {
 func (m Model) View() string {
 	styles := lipgloss.NewStyle().PaddingBottom(styles.Padding)
 	return fmt.Sprintf(
-		"%s\n%s\n%s",
+		"%s\n%s\n%s\n%s",
 		styles.Render(cursor.RenderLine(m.issueKey.View(), m.cursor.Index() == 0, m.issueKey.Input.Focused())),
 		styles.Render(cursor.RenderLine(m.work.View(), m.cursor.Index() == 1, m.work.Input.Focused())),
-		cursor.RenderLine(m.comment.View(), m.cursor.Index() == 2, m.comment.Input.Focused()),
+		styles.Render(cursor.RenderLine(m.start.View(), m.cursor.Index() == 2, m.start.Input.Focused())),
+		cursor.RenderLine(m.comment.View(), m.cursor.Index() == 3, m.comment.Input.Focused()),
 	)
 }
