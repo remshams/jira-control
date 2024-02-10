@@ -4,6 +4,7 @@ type IssueSearchRequest struct {
 	ProjectName string
 	Key         string
 	Summary     string
+	Fields      []string
 }
 
 func NewIssueSearchRequest() IssueSearchRequest {
