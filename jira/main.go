@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
-	issue_worklog "github.com/remshams/jira-control/jira/worklog"
+	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
 
 func main() {

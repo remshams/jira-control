@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/charmbracelet/log"
-	issue_worklog "github.com/remshams/jira-control/jira/worklog"
+	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
 
 type Worklog = issue_worklog.Worklog
