@@ -9,29 +9,19 @@ type WorklogAdapter interface {
 type Worklog struct {
 	adapter     WorklogAdapter
 	issueKey    string
-	hoursSpent  float64
-	start       time.Time
-	description string
+	HoursSpent  float64
+	Start       time.Time
+	Description string
 }
 
 func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Worklog {
 	return Worklog{
 		adapter:     adapter,
 		issueKey:    issueKey,
-		hoursSpent:  hoursSpent,
-		start:       time.Now(),
-		description: "",
+		HoursSpent:  hoursSpent,
+		Start:       time.Now(),
+		Description: "",
 	}
-}
-
-func (worklog *Worklog) withStart(start time.Time) *Worklog {
-	worklog.start = start
-	return worklog
-}
-
-func (worklog *Worklog) withDescription(description string) *Worklog {
-	worklog.description = description
-	return worklog
 }
 
 func (w Worklog) Log() error {
