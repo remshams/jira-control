@@ -1,0 +1,8 @@
+.logForm {
+  max-width: 50vw;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+  display: grid;
+  place-items: center;
+}

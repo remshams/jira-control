@@ -9,6 +9,17 @@ import "github.com/a-h/templ"
 import "context"
 import "io"
 import "bytes"
+import "strings"
+
+func logForm() templ.CSSClass {
+	var templ_7745c5c3_CSSBuilder strings.Builder
+	templ_7745c5c3_CSSBuilder.WriteString(`max-width:500px;`)
+	templ_7745c5c3_CSSID := templ.CSSID(`logForm`, templ_7745c5c3_CSSBuilder.String())
+	return templ.ComponentCSSClass{
+		ID:    templ_7745c5c3_CSSID,
+		Class: templ.SafeCSS(`.` + templ_7745c5c3_CSSID + `{` + templ_7745c5c3_CSSBuilder.String() + `}`),
+	}
+}
 
 func LogWork() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -23,7 +34,24 @@ func LogWork() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Log Work</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Log Jira Work</title><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css\"><link rel=\"stylesheet\" href=\"assets/styles.css\"></head><body>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 = []any{logForm()}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ.CSSClasses(templ_7745c5c3_Var2).String()))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"field\"><label class=\"label\">Field 1</label><div class=\"control\"><input class=\"input\" type=\"text\" placeholder=\"Text input 1\"></div></div><div class=\"field\"><label class=\"label\">Field 2</label><div class=\"control\"><input class=\"input\" type=\"text\" placeholder=\"Text input 2\"></div></div><div class=\"field\"><label class=\"label\">Field 3</label><div class=\"control\"><input class=\"input\" type=\"text\" placeholder=\"Text input 3\"></div></div><div class=\"field\"><label class=\"label\">Textarea</label><div class=\"control\"><textarea class=\"textarea\" placeholder=\"Textarea\"></textarea></div></div><div class=\"field is-grouped\"><div class=\"control\"><button class=\"button is-link\">Submit</button></div></div></form></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

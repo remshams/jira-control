@@ -7,6 +7,7 @@ import (
 
 func main() {
 	e := echo.New()
+	e.Static("/assets", "assets")
 	e.GET("/log", handler.HandleLogWork)
 
 	e.Logger.Fatal(e.Start(":8080"))
