@@ -1,0 +1,16 @@
+meta {
+  name: Get
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://{{url}}/rest/api/3/issue/{{issue}}/worklog
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
