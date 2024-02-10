@@ -3,7 +3,6 @@ package issue
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -106,7 +105,7 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 		},
 		utils_http.CreateBasicAuthHeader(jiraIssueAdapter.username, jiraIssueAdapter.apiToken),
 	}
-	res, err := utils_http.PerformRequest(
+	_, body, err := utils_http.PerformRequest(
 		"JiraIssueAdapter",
 		path.String(),
 		http.MethodPost,
@@ -116,12 +115,6 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 	)
 	if err != nil {
 		log.Errorf("JiraIssueAdapter: Could not perform request: %v", err)
-		return nil, err
-	}
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		log.Errorf("JiraIssueAdapter: Could not read response body: %v", err)
 		return nil, err
 	}
 	issueSearchResponseDto, err := fromJson(body)

@@ -47,6 +47,7 @@ func AppFromEnv() (*App, error) {
 		username:   username,
 		apiToken:   apiToken,
 	}
+	app.addAdapers()
 	return &app, nil
 }
 

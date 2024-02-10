@@ -1,14 +1,21 @@
 package issue
 
 type IssueSearchRequest struct {
+	adapter     IssueAdapter
 	ProjectName string
 	Key         string
 	Summary     string
 	Fields      []string
 }
 
-func NewIssueSearchRequest() IssueSearchRequest {
-	return IssueSearchRequest{}
+func NewIssueSearchRequest(adapter IssueAdapter) IssueSearchRequest {
+	return IssueSearchRequest{
+		adapter: adapter,
+	}
+}
+
+func (issueSearchRequest IssueSearchRequest) Search() ([]Issue, error) {
+	return issueSearchRequest.adapter.searchIssues(issueSearchRequest)
 }
 
 type IssueAdapter interface {

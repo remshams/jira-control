@@ -7,7 +7,7 @@ import (
 )
 
 func TestJqlFromSearchRequest_Summary(t *testing.T) {
-	request := NewIssueSearchRequest()
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request.Summary = "summary"
 	expected := fmt.Sprintf("summary ~ \"%s\"", request.Summary)
 
@@ -15,7 +15,7 @@ func TestJqlFromSearchRequest_Summary(t *testing.T) {
 }
 
 func TestJqlFromSearchRequest_Key(t *testing.T) {
-	request := NewIssueSearchRequest()
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request.Key = "key"
 	expected := fmt.Sprintf("key = \"%s\"", request.Key)
 
@@ -23,7 +23,7 @@ func TestJqlFromSearchRequest_Key(t *testing.T) {
 }
 
 func TestJqlFromSearchRequest_Project(t *testing.T) {
-	request := NewIssueSearchRequest()
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request.ProjectName = "project"
 	expected := fmt.Sprintf("project = \"%s\"", request.ProjectName)
 
@@ -31,7 +31,7 @@ func TestJqlFromSearchRequest_Project(t *testing.T) {
 }
 
 func TestJqlFromSearchRequest_Combined(t *testing.T) {
-	request := NewIssueSearchRequest()
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request.Summary = "summary"
 	request.Key = "key"
 	request.ProjectName = "project"
