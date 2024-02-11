@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/bubbles/tabs"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	common "github.com/remshams/jira-control/tui/_common"
@@ -17,6 +18,7 @@ import (
 
 type Model struct {
 	adapter tui_jira.JiraAdapter
+	tab     tabs.Model
 	title   title.Model
 	toast   toast.Model
 	help    help.Model
@@ -25,6 +27,9 @@ type Model struct {
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
+		tab: tabs.New(
+			[]string{"Worklog", "Issues"},
+		),
 		title:   title.New(),
 		toast:   toast.New(),
 		help:    help.New(),
@@ -38,6 +43,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.tab, cmd = m.tab.Update(msg)
 	m.toast, _ = m.toast.Update(msg)
 	m.help, _ = m.help.Update(msg)
 	m.title, _ = m.title.Update(msg)
@@ -55,12 +61,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	return fmt.Sprintf(
-		"%s\n%s\n%s\n%s",
+		"%s\n%s\n%s\n%s\n%s",
 		m.title.View(),
+		m.renderTab(),
 		m.renderContent(),
 		m.renderHelp(),
 		m.renderToast(),
 	)
+}
+
+func (m Model) renderTab() string {
+	style := lipgloss.NewStyle().PaddingTop(styles.Padding)
+	return style.Render(m.tab.View())
 }
 
 func (m Model) renderContent() string {
