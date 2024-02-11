@@ -29,7 +29,9 @@ type issueKeyMap struct {
 }
 
 func (m issueKeyMap) ShortHelp() []key.Binding {
-	help := []key.Binding{}
+	help := []key.Binding{
+		m.switchView,
+	}
 	if m.searchForm != nil {
 		help = append(help, issue_search_form.SearchFormKeys.ShortHelp()...)
 	}
@@ -40,7 +42,6 @@ func (m issueKeyMap) ShortHelp() []key.Binding {
 		help,
 		m.global.Tab.Tab,
 		m.global.Quit,
-		m.switchView,
 	)
 	return help
 }
@@ -53,8 +54,8 @@ var issueSearchKeys = issueKeyMap{
 	global:     common.GlobalKeys,
 	searchForm: &issue_search_form.SearchFormKeys,
 	switchView: key.NewBinding(
-		key.WithKeys("tab"),
-		key.WithHelp("tab", "switch view"),
+		key.WithKeys("s"),
+		key.WithHelp("s", "switch view"),
 	),
 }
 
@@ -62,8 +63,8 @@ var issueResultKeys = issueKeyMap{
 	global:       common.GlobalKeys,
 	searchResult: &issue_search_result.SearchResultKeys,
 	switchView: key.NewBinding(
-		key.WithKeys("tab"),
-		key.WithHelp("tab", "switch view"),
+		key.WithKeys("s"),
+		key.WithHelp("s", "switch view"),
 	),
 }
 
@@ -94,7 +95,47 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	switch m.state {
+	case stateSearchForm:
+		cmd = m.processSearchFormUpdate(msg)
+	case stateSearchResult:
+		cmd = m.processSearchResultUpdate(msg)
+	}
 	return m, cmd
+}
+
+func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, issueSearchKeys.switchView):
+			m.state = stateSearchResult
+			cmd = help.CreateSetKeyMapMsg(issueResultKeys)
+		default:
+			m.searchForm, cmd = m.searchForm.Update(msg)
+		}
+	default:
+		m.searchForm, cmd = m.searchForm.Update(msg)
+	}
+	return cmd
+}
+
+func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, issueResultKeys.switchView):
+			m.state = stateSearchForm
+			cmd = help.CreateSetKeyMapMsg(issueSearchKeys)
+		default:
+			m.searchResult, cmd = m.searchResult.Update(msg)
+		}
+	default:
+		m.searchResult, cmd = m.searchResult.Update(msg)
+	}
+	return cmd
 }
 
 func (m Model) View() string {
