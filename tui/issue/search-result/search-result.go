@@ -1,11 +1,28 @@
 package issue_search_result
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/jira-control/jira/issue"
 )
+
+type SearchResultKeyMap struct {
+	table table.KeyMap
+}
+
+func (m SearchResultKeyMap) ShortHelp() []key.Binding {
+	return table_utils.TableKeyBindings()
+}
+
+func (m SearchResultKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{}
+}
+
+var SearchResultKeys = SearchResultKeyMap{
+	table: table.DefaultKeyMap(),
+}
 
 type Model struct {
 	issues []issue.Issue
@@ -15,7 +32,11 @@ type Model struct {
 func New() Model {
 	m := Model{
 		issues: []issue.Issue{},
-		table:  createInitialTable(),
+		table: table.New(
+			table.WithRows([]table.Row{}),
+			table.WithColumns(createTableColumns()),
+			table.WithKeyMap(table.DefaultKeyMap()),
+		),
 	}
 	return m
 }

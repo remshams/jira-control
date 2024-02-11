@@ -5,11 +5,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/bubbles/cursor"
 	"github.com/remshams/common/tui/bubbles/textinput"
-	common "github.com/remshams/jira-control/tui/_common"
 )
 
 type SearchFormKeyMap struct {
-	global    common.GlobalKeyMap
 	cursor    cursor.KeyMap
 	textinput textinput.KeyMap
 }
@@ -19,8 +17,6 @@ func (m SearchFormKeyMap) ShortHelp() []key.Binding {
 		m.cursor.Up,
 		m.cursor.Down,
 		textinput.TextInputKeyMap.Edit,
-		m.global.Tab.Tab,
-		m.global.Quit,
 	}
 }
 
@@ -29,7 +25,6 @@ func (m SearchFormKeyMap) FullHelp() [][]key.Binding {
 }
 
 var SearchFormKeys = SearchFormKeyMap{
-	global:    common.GlobalKeys,
 	cursor:    cursor.CursorKeyMap,
 	textinput: textinput.TextInputKeyMap,
 }
