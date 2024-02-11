@@ -43,7 +43,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		toast:   toast.New(),
 		help:    help.New(),
 		worklog: worklog.New(adapter),
-		issue:   issue.New(),
+		issue:   issue.New(adapter),
 		state:   stateWorklog,
 	}
 }
@@ -70,7 +70,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, common.GlobalKeys.Quit):
 			cmd = tea.Quit
 		default:
-			cmd = m.processKeyPress(msg)
+			cmd = m.processUpdate(msg)
 		}
 	}
 	return m, tea.Batch(cmd, tabsCmd)
@@ -89,7 +89,7 @@ func (m *Model) processTab(msg tabs.TabSelectedMsg) tea.Cmd {
 	return cmd
 }
 
-func (m *Model) processKeyPress(msg tea.Msg) tea.Cmd {
+func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch m.state {
 	case stateIssue:
