@@ -1,12 +1,17 @@
 package issue
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/styles"
 	common "github.com/remshams/jira-control/tui/_common"
 	issue_search_form "github.com/remshams/jira-control/tui/issue/search-form"
+	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
@@ -30,14 +35,16 @@ var issueKeys = keyMap{
 }
 
 type Model struct {
-	adapter    tui_jira.JiraAdapter
-	searchForm issue_search_form.Model
+	adapter      tui_jira.JiraAdapter
+	searchForm   issue_search_form.Model
+	searchResult issue_search_result.Model
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
-		adapter:    adapter,
-		searchForm: issue_search_form.New(),
+		adapter:      adapter,
+		searchForm:   issue_search_form.New(),
+		searchResult: issue_search_result.New(),
 	}
 }
 
@@ -46,6 +53,7 @@ func (m Model) Init() tea.Cmd {
 		title.CreateSetPageTitleMsg("Issue"),
 		help.CreateSetKeyMapMsg(issueKeys),
 		m.searchForm.Init(),
+		m.searchResult.Init(),
 	)
 }
 
@@ -55,5 +63,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.searchForm.View()
+	styles := lipgloss.NewStyle().PaddingBottom(styles.Padding)
+	return fmt.Sprintf(
+		"%s\n%s",
+		styles.Render(m.searchForm.View()),
+		(m.searchResult.View()),
+	)
 }
