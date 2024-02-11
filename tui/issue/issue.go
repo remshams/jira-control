@@ -26,6 +26,7 @@ type issueKeyMap struct {
 	searchForm   *issue_search_form.SearchFormKeyMap
 	searchResult *issue_search_result.SearchResultKeyMap
 	switchView   key.Binding
+	help         key.Binding
 }
 
 func (m issueKeyMap) ShortHelp() []key.Binding {
@@ -38,6 +39,7 @@ func (m issueKeyMap) ShortHelp() []key.Binding {
 	if m.searchResult != nil {
 		help = append(help, issue_search_result.SearchResultKeys.ShortHelp()...)
 	}
+	help = append(help, m.help)
 	help = append(
 		help,
 		m.global.Tab.Tab,
@@ -47,7 +49,18 @@ func (m issueKeyMap) ShortHelp() []key.Binding {
 }
 
 func (m issueKeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{}
+	firstRow := m.ShortHelp()
+	secondRow := []key.Binding{}
+	if m.searchResult != nil {
+		secondRow = append(secondRow, issue_search_result.SearchResultKeys.FullHelp()...)
+	}
+	if m.searchForm != nil {
+		secondRow = append(secondRow, issue_search_form.SearchFormKeys.FullHelp()...)
+	}
+	return [][]key.Binding{
+		firstRow,
+		secondRow,
+	}
 }
 
 var issueSearchKeys = issueKeyMap{
@@ -57,6 +70,10 @@ var issueSearchKeys = issueKeyMap{
 		key.WithKeys("s"),
 		key.WithHelp("s", "switch view"),
 	),
+	help: key.NewBinding(
+		key.WithKeys("h", "?"),
+		key.WithHelp("h", "help"),
+	),
 }
 
 var issueResultKeys = issueKeyMap{
@@ -65,6 +82,10 @@ var issueResultKeys = issueKeyMap{
 	switchView: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "switch view"),
+	),
+	help: key.NewBinding(
+		key.WithKeys("h", "?"),
+		key.WithHelp("h", "help"),
 	),
 }
 

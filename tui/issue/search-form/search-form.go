@@ -20,8 +20,8 @@ func (m SearchFormKeyMap) ShortHelp() []key.Binding {
 	}
 }
 
-func (m SearchFormKeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{}
+func (m SearchFormKeyMap) FullHelp() []key.Binding {
+	return []key.Binding{}
 }
 
 var SearchFormKeys = SearchFormKeyMap{

@@ -13,11 +13,11 @@ type SearchResultKeyMap struct {
 }
 
 func (m SearchResultKeyMap) ShortHelp() []key.Binding {
-	return table_utils.TableKeyBindings()
+	return []key.Binding{}
 }
 
-func (m SearchResultKeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{}
+func (m SearchResultKeyMap) FullHelp() []key.Binding {
+	return table_utils.TableKeyBindings()
 }
 
 var SearchResultKeys = SearchResultKeyMap{
