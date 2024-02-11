@@ -5,18 +5,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	"github.com/remshams/common/tui/bubbles/tabs"
 	common "github.com/remshams/jira-control/tui/_common"
 )
 
 type keyMap struct {
 	global common.GlobalKeyMap
-	tab    tabs.TabKeyMap
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
-		k.tab.Tab,
+		k.global.Tab.Tab,
 		k.global.Quit,
 	}
 }
@@ -27,7 +25,6 @@ func (k keyMap) FullHelp() [][]key.Binding {
 
 var issueKeys = keyMap{
 	global: common.GlobalKeys,
-	tab:    tabs.TabKeys,
 }
 
 type Model struct {

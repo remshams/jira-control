@@ -11,7 +11,6 @@ import (
 	"github.com/remshams/common/tui/bubbles/cursor"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	"github.com/remshams/common/tui/bubbles/tabs"
 	"github.com/remshams/common/tui/bubbles/textinput"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
@@ -23,7 +22,6 @@ import (
 
 type keyMap struct {
 	global    common.GlobalKeyMap
-	tab       tabs.TabKeyMap
 	cursor    cursor.KeyMap
 	textinput textinput.KeyMap
 	save      key.Binding
@@ -31,7 +29,6 @@ type keyMap struct {
 
 var worklogKeys = keyMap{
 	global:    common.GlobalKeys,
-	tab:       tabs.TabKeys,
 	cursor:    cursor.CursorKeyMap,
 	textinput: textinput.TextInputKeyMap,
 	save: key.NewBinding(
@@ -46,7 +43,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 		k.cursor.Down,
 		textinput.TextInputKeyMap.Edit,
 		k.save,
-		k.tab.Tab,
+		k.global.Tab.Tab,
 		k.global.Quit,
 	}
 }
