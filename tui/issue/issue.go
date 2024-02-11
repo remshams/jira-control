@@ -23,29 +23,29 @@ const (
 
 type issueKeyMap struct {
 	global       common.GlobalKeyMap
+	help         help.KeyMap
 	searchForm   *issue_search_form.SearchFormKeyMap
 	searchResult *issue_search_result.SearchResultKeyMap
 	switchView   key.Binding
-	help         key.Binding
 }
 
 func (m issueKeyMap) ShortHelp() []key.Binding {
-	help := []key.Binding{
+	shortHelp := []key.Binding{
 		m.switchView,
 	}
 	if m.searchForm != nil {
-		help = append(help, issue_search_form.SearchFormKeys.ShortHelp()...)
+		shortHelp = append(shortHelp, issue_search_form.SearchFormKeys.ShortHelp()...)
 	}
 	if m.searchResult != nil {
-		help = append(help, issue_search_result.SearchResultKeys.ShortHelp()...)
+		shortHelp = append(shortHelp, issue_search_result.SearchResultKeys.ShortHelp()...)
 	}
-	help = append(help, m.help)
-	help = append(
-		help,
+	shortHelp = append(shortHelp, help.HelpKeys.Help)
+	shortHelp = append(
+		shortHelp,
 		m.global.Tab.Tab,
 		m.global.Quit,
 	)
-	return help
+	return shortHelp
 }
 
 func (m issueKeyMap) FullHelp() [][]key.Binding {
@@ -74,14 +74,11 @@ var issueSearchKeys = issueKeyMap{
 
 var issueResultKeys = issueKeyMap{
 	global:       common.GlobalKeys,
+	help:         help.HelpKeys,
 	searchResult: &issue_search_result.SearchResultKeys,
 	switchView: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "switch view"),
-	),
-	help: key.NewBinding(
-		key.WithKeys("h", "?"),
-		key.WithHelp("h", "help"),
 	),
 }
 
@@ -143,7 +140,7 @@ func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, issueResultKeys.help):
+		case key.Matches(msg, issueResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, issueResultKeys.switchView):
 			m.state = stateSearchForm
