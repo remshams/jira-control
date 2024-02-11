@@ -70,10 +70,6 @@ var issueSearchKeys = issueKeyMap{
 		key.WithKeys("s"),
 		key.WithHelp("s", "switch view"),
 	),
-	help: key.NewBinding(
-		key.WithKeys("h", "?"),
-		key.WithHelp("h", "help"),
-	),
 }
 
 var issueResultKeys = issueKeyMap{
@@ -147,6 +143,8 @@ func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, issueResultKeys.help):
+			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, issueResultKeys.switchView):
 			m.state = stateSearchForm
 			cmd = help.CreateSetKeyMapMsg(issueSearchKeys)
