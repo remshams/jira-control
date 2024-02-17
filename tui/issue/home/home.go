@@ -61,6 +61,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, issue_search_form.SearchFormKeys.SwitchView):
 			m.state = stateSearchResult
+			m.searchResult, cmd = m.searchResult.Update(msg)
 		default:
 			m.searchForm, cmd = m.searchForm.Update(msg)
 		}
@@ -77,6 +78,7 @@ func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, issue_search_result.SearchResultKeys.SwitchView):
 			m.state = stateSearchForm
+			m.searchForm, cmd = m.searchForm.Update(msg)
 		default:
 			m.searchResult, cmd = m.searchResult.Update(msg)
 		}

@@ -17,3 +17,10 @@ var GlobalKeys = GlobalKeyMap{
 		key.WithHelp("q/C-c", "Quit"),
 	),
 }
+
+func (k GlobalKeyMap) KeyBindings() []key.Binding {
+	return []key.Binding{
+		k.Tab.Tab,
+		k.Quit,
+	}
+}

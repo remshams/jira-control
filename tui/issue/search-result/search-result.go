@@ -4,24 +4,44 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/remshams/common/tui/bubbles/help"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/jira-control/jira/issue"
+	common "github.com/remshams/jira-control/tui/_common"
 )
 
 type SearchResultKeyMap struct {
-	table table.KeyMap
+	global     common.GlobalKeyMap
+	help       help.KeyMap
+	table      table.KeyMap
+	SwitchView key.Binding
 }
 
 func (m SearchResultKeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{}
+	shortHelp := []key.Binding{
+		m.SwitchView,
+		m.help.Help,
+		m.global.Tab.Tab,
+		m.global.Quit,
+	}
+	return append(shortHelp, m.global.KeyBindings()...)
 }
 
-func (m SearchResultKeyMap) FullHelp() []key.Binding {
-	return table_utils.TableKeyBindings()
+func (m SearchResultKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		m.ShortHelp(),
+		table_utils.TableKeyBindings(),
+	}
 }
 
 var SearchResultKeys = SearchResultKeyMap{
-	table: table.DefaultKeyMap(),
+	global: common.GlobalKeys,
+	help:   help.HelpKeys,
+	table:  table.DefaultKeyMap(),
+	SwitchView: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "Switch view"),
+	),
 }
 
 type Model struct {
@@ -47,6 +67,15 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, SearchResultKeys.SwitchView):
+			cmd = help.CreateSetKeyMapMsg(SearchResultKeys)
+		case key.Matches(msg, SearchResultKeys.help.Help):
+			cmd = help.CreateToggleFullHelpMsg()
+		}
+	}
 	return m, cmd
 }
 
