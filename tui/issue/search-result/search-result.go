@@ -78,6 +78,7 @@ func New() Model {
 			table.WithRows([]table.Row{}),
 			table.WithColumns(createTableColumns()),
 			table.WithKeyMap(table.DefaultKeyMap()),
+			table.WithFocused(true),
 		),
 	}
 	return m
@@ -102,6 +103,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
+		default:
+			m.table, cmd = m.table.Update(msg)
 		}
 	}
 	return m, cmd
