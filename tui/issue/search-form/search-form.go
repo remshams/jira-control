@@ -5,6 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/bubbles/cursor"
 	"github.com/remshams/common/tui/bubbles/help"
+	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/textinput"
 	common "github.com/remshams/jira-control/tui/_common"
 )
@@ -54,7 +55,10 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return help.CreateSetKeyMapMsg(SearchFormKeys)
+	return tea.Batch(
+		title.CreateSetPageTitleMsg("Issue Search"),
+		help.CreateSetKeyMapMsg(SearchFormKeys),
+	)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
