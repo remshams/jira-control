@@ -11,6 +11,18 @@ import (
 	common "github.com/remshams/jira-control/tui/_common"
 )
 
+type SetSearchResultAction struct {
+	issues []issue.Issue
+}
+
+func CreateSearchResultAction(issues []issue.Issue) tea.Cmd {
+	return func() tea.Msg {
+		return SetSearchResultAction{
+			issues: issues,
+		}
+	}
+}
+
 type SearchResultKeyMap struct {
 	global     common.GlobalKeyMap
 	help       help.KeyMap

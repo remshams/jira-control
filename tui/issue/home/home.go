@@ -7,8 +7,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
+	jira "github.com/remshams/jira-control/jira/public"
 	issue_search_form "github.com/remshams/jira-control/tui/issue/search-form"
 	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
@@ -56,6 +58,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case issue_search_form.ApplySearchAction:
+		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
+		issues, err := searchRequest.Search()
+		if err != nil {
+			cmd = toast.CreateErrorToastAction("Could not search for issues")
+		}
+		cmd = issue_search_result.CreateSearchResultAction(issues)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, issue_search_form.SearchFormKeys.SwitchView):

@@ -7,8 +7,19 @@ import (
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/textinput"
+	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
 )
+
+type ApplySearchAction struct {
+	SearchTerm string
+}
+
+func CreateApplySearchAction(searchTerm string) tea.Cmd {
+	return func() tea.Msg {
+		return ApplySearchAction{SearchTerm: searchTerm}
+	}
+}
 
 type SearchFormKeyMap struct {
 	global     common.GlobalKeyMap
@@ -42,9 +53,15 @@ var SearchFormKeys = SearchFormKeyMap{
 	),
 }
 
+const (
+	searchFormNavigate utils.ViewState = "navigate"
+	searchFormEdit     utils.ViewState = "edit"
+)
+
 type Model struct {
 	searchTerm textinput.Model
 	cursor     cursor.CursorState
+	state      utils.ViewState
 }
 
 func New() Model {
@@ -66,6 +83,18 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, SearchFormKeys.textinput.Edit):
+			m.state = searchFormEdit
+			m.searchTerm, cmd = m.searchTerm.Update(msg)
+		case key.Matches(msg, SearchFormKeys.textinput.Discard):
+			m.state = searchFormNavigate
+			m.searchTerm, cmd = m.searchTerm.Update(msg)
+		case key.Matches(msg, SearchFormKeys.textinput.Apply):
+			var searchTermCmd tea.Cmd
+			m.state = searchFormNavigate
+			m.searchTerm, searchTermCmd = m.searchTerm.Update(msg)
+			cmd = CreateApplySearchAction(m.searchTerm.Input.Value())
+			cmd = tea.Batch(cmd, searchTermCmd)
 		case key.Matches(msg, SearchFormKeys.SwitchView):
 			cmd = help.CreateSetKeyMapMsg(SearchFormKeys)
 		default:
