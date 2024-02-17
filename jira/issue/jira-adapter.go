@@ -75,7 +75,7 @@ func jqlFromSearchRequest(request IssueSearchRequest) string {
 	if request.ProjectName != "" {
 		jql = append(jql, fmt.Sprintf("project = \"%s\"", request.ProjectName))
 	}
-	return strings.Join(jql, " AND ")
+	return strings.Join(jql, " OR ")
 }
 
 type JiraIssueAdapter struct {

@@ -36,7 +36,7 @@ func TestJqlFromSearchRequest_Combined(t *testing.T) {
 	request.Key = "key"
 	request.ProjectName = "project"
 	expected := fmt.Sprintf(
-		"summary ~ \"%s\" AND key = \"%s\" AND project = \"%s\"",
+		"summary ~ \"%s\" OR key = \"%s\" OR project = \"%s\"",
 		request.Summary, request.Key, request.ProjectName,
 	)
 
