@@ -93,6 +93,9 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case SetSearchResultAction:
+		m.issues = msg.issues
+		m.table.SetRows(m.createTableRows())
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SearchResultKeys.switchView):

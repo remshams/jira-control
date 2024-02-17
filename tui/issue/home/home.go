@@ -63,7 +63,8 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 		if err != nil {
 			cmd = toast.CreateErrorToastAction("Could not search for issues")
 		}
-		cmd = issue_search_result.CreateSearchResultAction(issues)
+		m.state = stateSearchResult
+		cmd = tea.Batch(m.searchResult.Init(), issue_search_result.CreateSearchResultAction(issues))
 	case issue_search_form.SwitchViewAction:
 		m.state = stateSearchResult
 		cmd = m.searchResult.Init()
