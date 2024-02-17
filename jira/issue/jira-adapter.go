@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
@@ -105,13 +106,14 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 		},
 		utils_http.CreateBasicAuthHeader(jiraIssueAdapter.username, jiraIssueAdapter.apiToken),
 	}
+	timeout := 5 * time.Second
 	_, body, err := utils_http.PerformRequest(
 		"JiraIssueAdapter",
 		path.String(),
 		http.MethodPost,
 		headers,
 		searchRequestDto,
-		nil,
+		&timeout,
 	)
 	if err != nil {
 		log.Errorf("JiraIssueAdapter: Could not perform request: %v", err)
