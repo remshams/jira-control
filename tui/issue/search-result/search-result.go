@@ -11,6 +11,15 @@ import (
 	common "github.com/remshams/jira-control/tui/_common"
 )
 
+type SwitchViewAction struct {
+}
+
+func CreateSwitchViewAction() tea.Cmd {
+	return func() tea.Msg {
+		return SwitchViewAction{}
+	}
+}
+
 type SetSearchResultAction struct {
 	issues []issue.Issue
 }
@@ -27,12 +36,12 @@ type SearchResultKeyMap struct {
 	global     common.GlobalKeyMap
 	help       help.KeyMap
 	table      table.KeyMap
-	SwitchView key.Binding
+	switchView key.Binding
 }
 
 func (m SearchResultKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
-		m.SwitchView,
+		m.switchView,
 		m.help.Help,
 		m.global.Tab.Tab,
 		m.global.Quit,
@@ -51,7 +60,7 @@ var SearchResultKeys = SearchResultKeyMap{
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap(),
-	SwitchView: key.NewBinding(
+	switchView: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "Switch to search"),
 	),
@@ -86,8 +95,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, SearchResultKeys.SwitchView):
-			cmd = help.CreateSetKeyMapMsg(SearchResultKeys)
+		case key.Matches(msg, SearchResultKeys.switchView):
+			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		}

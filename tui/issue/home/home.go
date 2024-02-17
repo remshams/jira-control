@@ -3,7 +3,6 @@ package issue_home
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	title "github.com/remshams/common/tui/bubbles/page_title"
@@ -65,14 +64,9 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 			cmd = toast.CreateErrorToastAction("Could not search for issues")
 		}
 		cmd = issue_search_result.CreateSearchResultAction(issues)
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, issue_search_form.SearchFormKeys.SwitchView):
-			m.state = stateSearchResult
-			cmd = m.searchResult.Init()
-		default:
-			m.searchForm, cmd = m.searchForm.Update(msg)
-		}
+	case issue_search_form.SwitchViewAction:
+		m.state = stateSearchResult
+		cmd = m.searchResult.Init()
 	default:
 		m.searchForm, cmd = m.searchForm.Update(msg)
 	}
@@ -82,14 +76,9 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, issue_search_result.SearchResultKeys.SwitchView):
-			m.state = stateSearchForm
-			cmd = m.searchForm.Init()
-		default:
-			m.searchResult, cmd = m.searchResult.Update(msg)
-		}
+	case issue_search_result.SwitchViewAction:
+		m.state = stateSearchForm
+		cmd = m.searchForm.Init()
 	default:
 		m.searchResult, cmd = m.searchResult.Update(msg)
 	}

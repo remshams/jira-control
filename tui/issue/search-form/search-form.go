@@ -21,11 +21,19 @@ func CreateApplySearchAction(searchTerm string) tea.Cmd {
 	}
 }
 
+type SwitchViewAction struct{}
+
+func CreateSwitchViewAction() tea.Cmd {
+	return func() tea.Msg {
+		return SwitchViewAction{}
+	}
+}
+
 type SearchFormKeyMap struct {
 	global     common.GlobalKeyMap
 	cursor     cursor.KeyMap
 	textinput  textinput.KeyMap
-	SwitchView key.Binding
+	switchView key.Binding
 }
 
 func (m SearchFormKeyMap) ShortHelp() []key.Binding {
@@ -34,7 +42,7 @@ func (m SearchFormKeyMap) ShortHelp() []key.Binding {
 		m.cursor.Down,
 		textinput.TextInputKeyMap.Edit,
 		textinput.TextInputKeyMap.Discard,
-		m.SwitchView,
+		m.switchView,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
 }
@@ -47,7 +55,7 @@ var SearchFormKeys = SearchFormKeyMap{
 	global:    common.GlobalKeys,
 	cursor:    cursor.CursorKeyMap,
 	textinput: textinput.TextInputKeyMap,
-	SwitchView: key.NewBinding(
+	switchView: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "Switch to result"),
 	),
@@ -95,8 +103,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.searchTerm, searchTermCmd = m.searchTerm.Update(msg)
 			cmd = CreateApplySearchAction(m.searchTerm.Input.Value())
 			cmd = tea.Batch(cmd, searchTermCmd)
-		case key.Matches(msg, SearchFormKeys.SwitchView):
-			cmd = help.CreateSetKeyMapMsg(SearchFormKeys)
+		case key.Matches(msg, SearchFormKeys.switchView):
+			cmd = tea.Batch(help.CreateSetKeyMapMsg(SearchFormKeys), CreateSwitchViewAction())
 		default:
 			m.searchTerm, cmd = m.searchTerm.Update(msg)
 		}
