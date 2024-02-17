@@ -39,7 +39,6 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		title.CreateSetPageTitleMsg("Issue"),
 		m.searchForm.Init(),
-		m.searchResult.Init(),
 	)
 }
 
@@ -61,7 +60,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, issue_search_form.SearchFormKeys.SwitchView):
 			m.state = stateSearchResult
-			m.searchResult, cmd = m.searchResult.Update(msg)
+			cmd = m.searchResult.Init()
 		default:
 			m.searchForm, cmd = m.searchForm.Update(msg)
 		}
@@ -78,7 +77,7 @@ func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, issue_search_result.SearchResultKeys.SwitchView):
 			m.state = stateSearchForm
-			m.searchForm, cmd = m.searchForm.Update(msg)
+			cmd = m.searchForm.Init()
 		default:
 			m.searchResult, cmd = m.searchResult.Update(msg)
 		}

@@ -62,7 +62,7 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return help.CreateSetKeyMapMsg(SearchResultKeys)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
