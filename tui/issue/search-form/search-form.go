@@ -76,6 +76,7 @@ func New() Model {
 	return Model{
 		searchTerm: textinput.New("Search", ""),
 		cursor:     cursor.New(0),
+		state:      searchFormNavigate,
 	}
 }
 
@@ -88,12 +89,35 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	switch m.state {
+	case searchFormEdit:
+		cmd = m.processEdit(msg)
+	case searchFormNavigate:
+		cmd = m.processNavigate(msg)
+	}
+	return m, cmd
+}
+
+func (m *Model) processNavigate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SearchFormKeys.textinput.Edit):
 			m.state = searchFormEdit
 			m.searchTerm, cmd = m.searchTerm.Update(msg)
+		case key.Matches(msg, SearchFormKeys.switchView):
+			cmd = tea.Batch(help.CreateSetKeyMapMsg(SearchFormKeys), CreateSwitchViewAction())
+		}
+	}
+	return cmd
+}
+
+func (m *Model) processEdit(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
 		case key.Matches(msg, SearchFormKeys.textinput.Discard):
 			m.state = searchFormNavigate
 			m.searchTerm, cmd = m.searchTerm.Update(msg)
@@ -103,15 +127,11 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.searchTerm, searchTermCmd = m.searchTerm.Update(msg)
 			cmd = CreateApplySearchAction(m.searchTerm.Input.Value())
 			cmd = tea.Batch(cmd, searchTermCmd)
-		case key.Matches(msg, SearchFormKeys.switchView):
-			cmd = tea.Batch(help.CreateSetKeyMapMsg(SearchFormKeys), CreateSwitchViewAction())
 		default:
 			m.searchTerm, cmd = m.searchTerm.Update(msg)
 		}
-	default:
-		m.searchTerm, cmd = m.searchTerm.Update(msg)
 	}
-	return m, cmd
+	return cmd
 }
 
 func (m Model) View() string {
