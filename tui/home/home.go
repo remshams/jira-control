@@ -13,7 +13,7 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
-	"github.com/remshams/jira-control/tui/issue"
+	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	"github.com/remshams/jira-control/tui/worklog"
 )
@@ -29,7 +29,7 @@ type Model struct {
 	title   title.Model
 	toast   toast.Model
 	help    help.Model
-	issue   issue.Model
+	issue   issue_home.Model
 	worklog worklog.Model
 	state   utils.ViewState
 }
@@ -43,7 +43,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		toast:   toast.New(),
 		help:    help.New(),
 		worklog: worklog.New(adapter),
-		issue:   issue.New(adapter),
+		issue:   issue_home.New(adapter),
 		state:   stateWorklog,
 	}
 }
