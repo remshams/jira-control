@@ -58,14 +58,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case issue_search_form.ApplySearchAction:
-		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
-		searchRequest.Summary = msg.SearchTerm
-		issues, err := searchRequest.Search()
-		if err != nil {
-			cmd = toast.CreateErrorToastAction("Could not search for issues")
-		}
-		m.state = stateSearchResult
-		cmd = tea.Batch(m.searchResult.Init(), issue_search_result.CreateSearchResultAction(issues))
+		cmd = m.search(msg.SearchTerm)
 	case issue_search_form.SwitchViewAction:
 		m.state = stateSearchResult
 		cmd = m.searchResult.Init()
@@ -73,6 +66,17 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 		m.searchForm, cmd = m.searchForm.Update(msg)
 	}
 	return cmd
+}
+
+func (m *Model) search(searchTerm string) tea.Cmd {
+	searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
+	searchRequest.Summary = searchTerm
+	issues, err := searchRequest.Search()
+	if err != nil {
+		return toast.CreateErrorToastAction("Could not search for issues")
+	}
+	m.state = stateSearchResult
+	return tea.Batch(m.searchResult.Init(), issue_search_result.CreateSearchResultAction(issues))
 }
 
 func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
