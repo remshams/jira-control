@@ -73,7 +73,10 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		fmt.Println("fatal:", err)
 		os.Exit(1)
 	}
-	jiraAdapter := tui_jira.NewJiraAdapter(app.IssueWorklogAdapter)
+	jiraAdapter := tui_jira.NewJiraAdapter(
+		app.IssueAdapter,
+		app.IssueWorklogAdapter,
+	)
 	m := home.New(jiraAdapter)
 	return m, []tea.ProgramOption{tea.WithAltScreen()}
 }

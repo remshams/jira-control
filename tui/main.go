@@ -25,7 +25,7 @@ func main() {
 		fmt.Println("fatal:", err)
 		os.Exit(1)
 	}
-	jiraAdapter := tui_jira.NewJiraAdapter(app.IssueWorklogAdapter)
+	jiraAdapter := tui_jira.NewJiraAdapter(app.IssueAdapter, app.IssueWorklogAdapter)
 	p := tea.NewProgram(home.New(jiraAdapter))
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
