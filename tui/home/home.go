@@ -72,6 +72,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			cmd = m.processUpdate(msg)
 		}
+	default:
+		cmd = m.processUpdate(msg)
 	}
 	return m, tea.Batch(cmd, tabsCmd)
 }
