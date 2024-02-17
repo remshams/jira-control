@@ -38,7 +38,7 @@ var SearchFormKeys = SearchFormKeyMap{
 	textinput: textinput.TextInputKeyMap,
 	SwitchView: key.NewBinding(
 		key.WithKeys("s"),
-		key.WithHelp("s", "Switch view"),
+		key.WithHelp("s", "Switch to result"),
 	),
 }
 

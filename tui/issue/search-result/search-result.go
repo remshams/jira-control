@@ -41,7 +41,7 @@ var SearchResultKeys = SearchResultKeyMap{
 	table:  table.DefaultKeyMap(),
 	SwitchView: key.NewBinding(
 		key.WithKeys("s"),
-		key.WithHelp("s", "Switch view"),
+		key.WithHelp("s", "Switch to search"),
 	),
 }
 
