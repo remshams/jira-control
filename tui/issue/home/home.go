@@ -3,6 +3,7 @@ package issue_home
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	title "github.com/remshams/common/tui/bubbles/page_title"
@@ -15,23 +16,61 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type searchSuccessAction struct {
+	issues []jira.Issue
+}
+
+type searchErrorAction struct{}
+
+func createSearchIssueAction(searchRequest jira.IssueSearchRequest) tea.Cmd {
+	return func() tea.Msg {
+		issuesChan := make(chan []jira.Issue)
+		searchErrorChan := make(chan error)
+		go search(searchRequest, issuesChan, searchErrorChan)
+		select {
+		case issues := <-issuesChan:
+			return searchSuccessAction{
+				issues: issues,
+			}
+		case <-searchErrorChan:
+			return searchErrorAction{}
+		}
+	}
+}
+
+func search(searchRequest jira.IssueSearchRequest, issuesChan chan []jira.Issue, searchErrorChan chan error) {
+	defer close(issuesChan)
+	defer close(searchErrorChan)
+	issues, err := searchRequest.Search()
+	if err != nil {
+		searchErrorChan <- err
+	} else {
+		issuesChan <- issues
+	}
+}
+
 const (
-	stateSearchForm   utils.ViewState = "search-form"
-	stateSearchResult utils.ViewState = "search-result"
+	stateSearchForm    utils.ViewState = "search-form"
+	stateSearchResult  utils.ViewState = "search-result"
+	stateSearchLoading utils.ViewState = "search-loading"
 )
 
 type Model struct {
 	adapter      tui_jira.JiraAdapter
 	searchForm   issue_search_form.Model
 	searchResult issue_search_result.Model
+	spinner      spinner.Model
 	state        utils.ViewState
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
+	spinner := spinner.New(spinner.WithSpinner(spinner.Dot))
+	spinner.Style = lipgloss.NewStyle().Foreground(styles.SelectedColor)
 	return Model{
 		adapter:      adapter,
 		searchForm:   issue_search_form.New(),
 		searchResult: issue_search_result.New(),
+		spinner:      spinner,
 		state:        stateSearchForm,
 	}
 }
@@ -50,6 +89,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmd = m.processSearchFormUpdate(msg)
 	case stateSearchResult:
 		cmd = m.processSearchResultUpdate(msg)
+	case stateSearchLoading:
+		cmd = m.processLoadingUpdate(msg)
 	}
 	return m, cmd
 }
@@ -58,7 +99,10 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case issue_search_form.ApplySearchAction:
-		cmd = m.search(msg.SearchTerm)
+		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
+		searchRequest.Summary = msg.SearchTerm
+		m.state = stateSearchLoading
+		cmd = tea.Batch(m.spinner.Tick, createSearchIssueAction(searchRequest))
 	case issue_search_form.SwitchViewAction:
 		m.state = stateSearchResult
 		cmd = m.searchResult.Init()
@@ -68,15 +112,22 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
-func (m *Model) search(searchTerm string) tea.Cmd {
-	searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
-	searchRequest.Summary = searchTerm
-	issues, err := searchRequest.Search()
-	if err != nil {
-		return toast.CreateErrorToastAction("Could not search for issues")
+func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case searchSuccessAction:
+		m.state = stateSearchResult
+		return tea.Batch(
+			m.searchResult.Init(),
+			issue_search_result.CreateSearchResultAction(msg.issues),
+		)
+	case searchErrorAction:
+		m.state = stateSearchForm
+		cmd = toast.CreateErrorToastAction("Error while searching issues")
+	default:
+		m.spinner, cmd = m.spinner.Update(msg)
 	}
-	m.state = stateSearchResult
-	return tea.Batch(m.searchResult.Init(), issue_search_result.CreateSearchResultAction(issues))
+	return cmd
 }
 
 func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
@@ -96,6 +147,15 @@ func (m Model) View() string {
 	return fmt.Sprintf(
 		"%s\n%s",
 		styles.Render(m.searchForm.View()),
-		(m.searchResult.View()),
+		m.renderSearchResult(),
 	)
+}
+
+func (m Model) renderSearchResult() string {
+	if m.state == stateSearchLoading {
+		styles := lipgloss.NewStyle().Foreground(styles.SelectedColor)
+		return fmt.Sprintf("%s %s", m.spinner.View(), styles.Render("Loading issues..."))
+	} else {
+		return m.searchResult.View()
+	}
 }
