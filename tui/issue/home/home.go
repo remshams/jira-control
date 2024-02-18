@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
@@ -76,10 +75,14 @@ func New(adapter tui_jira.JiraAdapter) Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(
-		title.CreateSetPageTitleMsg("Issue"),
-		m.searchForm.Init(),
-	)
+	switch m.state {
+	case stateSearchForm:
+		return m.searchForm.Init()
+	case stateSearchResult:
+		return m.searchResult.Init()
+	default:
+		return nil
+	}
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
