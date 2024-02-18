@@ -13,6 +13,7 @@ import (
 	"github.com/remshams/jira-control/jira/issue"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
+	app_store "github.com/remshams/jira-control/tui/store"
 )
 
 type LogWorkAction struct {
@@ -97,8 +98,6 @@ func New() Model {
 	m := Model{
 		issues: []issue.Issue{},
 		table: table.New(
-			table.WithRows([]table.Row{}),
-			table.WithColumns(createTableColumns()),
 			table.WithKeyMap(table.DefaultKeyMap()),
 			table.WithFocused(true),
 		),
@@ -118,6 +117,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SetSearchResultAction:
 		m.issues = msg.issues
+		m.table.SetColumns(m.createTableColumns())
 		m.table.SetRows(m.createTableRows())
 		m.table.GotoTop()
 	case tea.KeyMsg:
@@ -143,7 +143,10 @@ func (m Model) View() string {
 	if len(m.table.Rows()) > 0 {
 		return m.table.View()
 	} else {
-		style := lipgloss.NewStyle().Foreground(styles.SelectedColor)
+		style := lipgloss.NewStyle().
+			Foreground(styles.SelectedColor).
+			Width(app_store.LayoutStore.Width).
+			Align(lipgloss.Center)
 		return style.Render("No issues")
 	}
 }
@@ -152,16 +155,12 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 	return table_utils.CreateTable(columns, rows)
 }
 
-func createInitialTable() table.Model {
-	return table_utils.CreateTable(createTableColumns(), []table.Row{})
-}
-
-func createTableColumns() []table.Column {
+func (m Model) createTableColumns() []table.Column {
 	return []table.Column{
-		{Title: "Key", Width: 10},
-		{Title: "Summary", Width: 40},
-		{Title: "ProjectName", Width: 40},
-		{Title: "ProjectKey", Width: 20},
+		{Title: "Key", Width: table_utils.ColumnWidthFromPercent(10, app_store.LayoutStore.Width)},
+		{Title: "Summary", Width: table_utils.ColumnWidthFromPercent(50, app_store.LayoutStore.Width)},
+		{Title: "ProjectName", Width: table_utils.ColumnWidthFromPercent(30, app_store.LayoutStore.Width)},
+		{Title: "ProjectKey", Width: table_utils.ColumnWidthFromPercent(10, app_store.LayoutStore.Width)},
 	}
 }
 
