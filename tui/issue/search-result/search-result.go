@@ -117,6 +117,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case SetSearchResultAction:
 		m.issues = msg.issues
 		m.table.SetRows(m.createTableRows())
+		m.table.GotoTop()
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SearchResultKeys.switchView):
