@@ -20,6 +20,18 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type SetIssueKeyAction struct {
+	IssueKey string
+}
+
+func CreateSetIssueKeyAction(issueKey string) tea.Cmd {
+	return func() tea.Msg {
+		return SetIssueKeyAction{
+			IssueKey: issueKey,
+		}
+	}
+}
+
 type keyMap struct {
 	global    common.GlobalKeyMap
 	cursor    cursor.KeyMap
@@ -89,6 +101,8 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case SetIssueKeyAction:
+		m.issueKey.Input.SetValue(msg.IssueKey)
 	case tea.KeyMsg:
 		if m.state == navigate {
 			switch {

@@ -111,6 +111,7 @@ func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 		cmd = tea.Batch(
 			tabs.CreateSelectTabAction(0),
 			m.worklog.Init(),
+			worklog.CreateSetIssueKeyAction(msg.Issue.Key),
 		)
 	default:
 		m.issue, cmd = m.issue.Update(msg)
