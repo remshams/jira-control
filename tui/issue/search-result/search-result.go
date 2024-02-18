@@ -117,6 +117,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SetSearchResultAction:
 		m.issues = msg.issues
+		m.table.SetWidth(m.calculateTableWidth())
 		m.table.SetColumns(m.createTableColumns())
 		m.table.SetRows(m.createTableRows())
 		m.table.GotoTop()
@@ -156,11 +157,12 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 }
 
 func (m Model) createTableColumns() []table.Column {
+	tableWidth := m.calculateTableWidth()
 	return []table.Column{
-		{Title: "Key", Width: table_utils.ColumnWidthFromPercent(10, app_store.LayoutStore.Width)},
-		{Title: "Summary", Width: table_utils.ColumnWidthFromPercent(50, app_store.LayoutStore.Width)},
-		{Title: "ProjectName", Width: table_utils.ColumnWidthFromPercent(30, app_store.LayoutStore.Width)},
-		{Title: "ProjectKey", Width: table_utils.ColumnWidthFromPercent(10, app_store.LayoutStore.Width)},
+		{Title: "Key", Width: table_utils.ColumnWidthFromPercent(10, tableWidth)},
+		{Title: "Summary", Width: table_utils.ColumnWidthFromPercent(50, tableWidth)},
+		{Title: "ProjectName", Width: table_utils.ColumnWidthFromPercent(30, tableWidth)},
+		{Title: "ProjectKey", Width: table_utils.ColumnWidthFromPercent(10, tableWidth)},
 	}
 }
 
@@ -185,4 +187,8 @@ func (m Model) findIssue(key string) *issue.Issue {
 		}
 	}
 	return nil
+}
+
+func (m Model) calculateTableWidth() int {
+	return app_store.LayoutStore.Width - 5
 }
