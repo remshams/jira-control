@@ -4,10 +4,12 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/common/tui/bubbles/toast"
+	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/jira-control/jira/issue"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
@@ -138,7 +140,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.table.View()
+	if len(m.table.Rows()) > 0 {
+		return m.table.View()
+	} else {
+		style := lipgloss.NewStyle().Foreground(styles.SelectedColor)
+		return style.Render("No issues")
+	}
 }
 
 func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model {
