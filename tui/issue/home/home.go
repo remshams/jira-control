@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/log"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
@@ -137,8 +136,6 @@ func (m *Model) processSearchResultUpdate(msg tea.Msg) tea.Cmd {
 	case issue_search_result.SwitchViewAction:
 		m.state = stateSearchForm
 		cmd = m.searchForm.Init()
-	case issue_search_result.LogWorkAction:
-		log.Debugf("Log work for issue %s", msg.Issue.Key)
 	default:
 		m.searchResult, cmd = m.searchResult.Update(msg)
 	}

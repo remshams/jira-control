@@ -14,6 +14,7 @@ import (
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
+	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	"github.com/remshams/jira-control/tui/worklog"
 )
@@ -95,9 +96,24 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch m.state {
 	case stateIssue:
-		m.issue, cmd = m.issue.Update(msg)
+		cmd = m.processIssueUpdate(msg)
 	case stateWorklog:
 		m.worklog, cmd = m.worklog.Update(msg)
+	}
+	return cmd
+}
+
+func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case issue_search_result.LogWorkAction:
+		m.state = stateWorklog
+		cmd = tea.Batch(
+			tabs.CreateSelectTabAction(0),
+			m.worklog.Init(),
+		)
+	default:
+		m.issue, cmd = m.issue.Update(msg)
 	}
 	return cmd
 }
