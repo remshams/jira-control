@@ -7,9 +7,23 @@ import (
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/jira-control/jira/issue"
+	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 )
+
+type LogWorkAction struct {
+	Issue jira.Issue
+}
+
+func CreateLogWorkAction(issue jira.Issue) tea.Cmd {
+	return func() tea.Msg {
+		return LogWorkAction{
+			Issue: issue,
+		}
+	}
+}
 
 type SwitchViewAction struct {
 }
@@ -36,11 +50,13 @@ type SearchResultKeyMap struct {
 	global     common.GlobalKeyMap
 	help       help.KeyMap
 	table      table.KeyMap
+	logWork    key.Binding
 	switchView key.Binding
 }
 
 func (m SearchResultKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
+		m.logWork,
 		m.switchView,
 		m.help.Help,
 		m.global.Tab.Tab,
@@ -57,6 +73,10 @@ func (m SearchResultKeyMap) FullHelp() [][]key.Binding {
 }
 
 var SearchResultKeys = SearchResultKeyMap{
+	logWork: key.NewBinding(
+		key.WithKeys("l"),
+		key.WithHelp("l", "Log work"),
+	),
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap(),
@@ -103,6 +123,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
+		case key.Matches(msg, SearchResultKeys.logWork):
+			issue := m.findIssue(m.table.SelectedRow()[0])
+			if issue == nil {
+				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
+			}
+			cmd = CreateLogWorkAction(*issue)
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}
@@ -143,4 +169,13 @@ func (m Model) createTableRows() []table.Row {
 		})
 	}
 	return rows
+}
+
+func (m Model) findIssue(key string) *issue.Issue {
+	for _, issue := range m.issues {
+		if issue.Key == key {
+			return &issue
+		}
+	}
+	return nil
 }
