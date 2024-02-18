@@ -16,6 +16,7 @@ import (
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
+	app_store "github.com/remshams/jira-control/tui/store"
 	"github.com/remshams/jira-control/tui/worklog"
 )
 
@@ -64,6 +65,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.help, _ = m.help.Update(msg)
 	m.title, _ = m.title.Update(msg)
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		app_store.LayoutStore.Height = msg.Height
+		app_store.LayoutStore.Width = msg.Width
 	case tabs.TabSelectedMsg:
 		cmd = m.processTab(msg)
 	case tea.KeyMsg:
