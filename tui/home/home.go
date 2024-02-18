@@ -68,6 +68,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		app_store.LayoutStore.Height = msg.Height
 		app_store.LayoutStore.Width = msg.Width
+		cmd = m.processUpdate(msg)
 	case tabs.TabSelectedMsg:
 		cmd = m.processTab(msg)
 	case tea.KeyMsg:
