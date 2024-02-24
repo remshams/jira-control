@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
@@ -115,11 +116,11 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.recalculateTableLayout()
 	case SetSearchResultAction:
 		m.issues = msg.issues
-		m.table.SetWidth(m.calculateTableWidth())
-		m.table.SetColumns(m.createTableColumns())
-		m.table.SetRows(m.createTableRows())
+		m.recalculateTableLayout()
 		m.table.GotoTop()
 	case tea.KeyMsg:
 		switch {
@@ -157,12 +158,12 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 }
 
 func (m Model) createTableColumns() []table.Column {
-	tableWidth := m.calculateTableWidth()
+	tableWidth, _ := m.calculateTableDimensions()
 	return []table.Column{
-		{Title: "Key", Width: table_utils.ColumnWidthFromPercent(10, tableWidth)},
-		{Title: "Summary", Width: table_utils.ColumnWidthFromPercent(50, tableWidth)},
-		{Title: "ProjectName", Width: table_utils.ColumnWidthFromPercent(30, tableWidth)},
-		{Title: "ProjectKey", Width: table_utils.ColumnWidthFromPercent(10, tableWidth)},
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth)},
+		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth)},
+		{Title: "ProjectName", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth)},
+		{Title: "ProjectKey", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth)},
 	}
 }
 
@@ -189,6 +190,20 @@ func (m Model) findIssue(key string) *issue.Issue {
 	return nil
 }
 
-func (m Model) calculateTableWidth() int {
-	return app_store.LayoutStore.Width - 5
+func (m Model) calculateTableDimensions() (int, int) {
+	width := app_store.LayoutStore.Width - 5
+	height := app_store.LayoutStore.Height - 11
+	if height < 0 {
+		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height)
+	}
+	return width, height
+}
+
+func (m *Model) recalculateTableLayout() {
+	width, height := m.calculateTableDimensions()
+	log.Debugf("width: %d, height: %d", width, height)
+	m.table.SetWidth(width)
+	m.table.SetHeight(height)
+	m.table.SetColumns(m.createTableColumns())
+	m.table.SetRows(m.createTableRows())
 }
