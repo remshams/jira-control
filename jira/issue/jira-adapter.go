@@ -112,6 +112,7 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 		path.String(),
 		http.MethodPost,
 		headers,
+		[]utils_http.QueryParam{},
 		searchRequestDto,
 		&timeout,
 	)
