@@ -17,7 +17,7 @@ import (
 	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
-	"github.com/remshams/jira-control/tui/worklog"
+	"github.com/remshams/jira-control/tui/worklog/details"
 )
 
 const (
@@ -32,7 +32,7 @@ type Model struct {
 	toast   toast.Model
 	help    help.Model
 	issue   issue_home.Model
-	worklog worklog.Model
+	worklog worklog_details.Model
 	state   utils.ViewState
 }
 
@@ -44,7 +44,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		title:   title.New(),
 		toast:   toast.New(),
 		help:    help.New(),
-		worklog: worklog.New(adapter),
+		worklog: worklog_details.New(adapter),
 		issue:   issue_home.New(adapter),
 		state:   stateWorklog,
 	}
@@ -116,7 +116,7 @@ func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 		cmd = tea.Batch(
 			tabs.CreateSelectTabAction(0),
 			m.worklog.Init(),
-			worklog.CreateSetIssueKeyAction(msg.Issue.Key),
+			worklog_details.CreateSetIssueKeyAction(msg.Issue.Key),
 		)
 	default:
 		m.issue, cmd = m.issue.Update(msg)

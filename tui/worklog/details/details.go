@@ -1,4 +1,4 @@
-package worklog
+package worklog_details
 
 import (
 	"fmt"
