@@ -1,5 +1,7 @@
 package issue
 
+import issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+
 type IssueSearchRequest struct {
 	adapter     IssueAdapter
 	ProjectName string
@@ -20,6 +22,7 @@ func (issueSearchRequest IssueSearchRequest) Search() ([]Issue, error) {
 
 type IssueAdapter interface {
 	searchIssues(request IssueSearchRequest) ([]Issue, error)
+	worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error)
 }
 
 type IssueProject struct {

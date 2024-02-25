@@ -10,9 +10,11 @@ import (
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
+	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
 
 const path = "rest/api/3/search"
+const worklogPath = "rest/api/3/issue/%s/worklog"
 
 type issueSearchRequestDto struct {
 	Jql    string `json:"jql"`
@@ -80,16 +82,18 @@ func jqlFromSearchRequest(request IssueSearchRequest) string {
 }
 
 type JiraIssueAdapter struct {
-	url      url.URL
-	username string
-	apiToken string
+	worklogAdapter issue_worklog.WorklogAdapter
+	url            url.URL
+	username       string
+	apiToken       string
 }
 
-func NewJiraIssueAdapter(url url.URL, username string, apiToken string) JiraIssueAdapter {
+func NewJiraIssueAdapter(worklogAdapter issue_worklog.WorklogAdapter, url url.URL, username string, apiToken string) JiraIssueAdapter {
 	return JiraIssueAdapter{
-		url:      url,
-		username: username,
-		apiToken: apiToken,
+		worklogAdapter: worklogAdapter,
+		url:            url,
+		username:       username,
+		apiToken:       apiToken,
 	}
 }
 
@@ -144,4 +148,8 @@ func issuesFromDto(issuesDto []issueDto) []Issue {
 			))
 	}
 	return issues
+}
+
+func (jiraIssueAdapter JiraIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error) {
+	return jiraIssueAdapter.worklogAdapter.List(query)
 }

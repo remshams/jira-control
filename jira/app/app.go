@@ -54,11 +54,11 @@ func AppFromEnv() (*App, error) {
 func (app *App) addAdapers() {
 	var issueAdapter issue.IssueAdapter
 	if app.production == true {
-		app.IssueAdapter = issue.NewJiraIssueAdapter(app.url, app.username, app.apiToken)
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogJiraAdapter(app.url, app.username, app.apiToken)
+		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.url, app.username, app.apiToken)
 	} else {
 		issueAdapter = issue.NewMockIssueAdapter()
-		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
 		app.IssueAdapter = issueAdapter
+		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
 	}
 }
