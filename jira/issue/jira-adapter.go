@@ -128,15 +128,16 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 	if err != nil {
 		return nil, err
 	}
-	return issuesFromDto(issueSearchResponseDto.Issues), nil
+	return issuesFromDto(jiraIssueAdapter, issueSearchResponseDto.Issues), nil
 }
 
-func issuesFromDto(issuesDto []issueDto) []Issue {
+func issuesFromDto(adapter JiraIssueAdapter, issuesDto []issueDto) []Issue {
 	issues := []Issue{}
 	for _, issue := range issuesDto {
 		issues = append(
 			issues,
 			NewIssue(
+				adapter,
 				issue.Id,
 				NewIssueProject(
 					issue.Fields.Project.Key,

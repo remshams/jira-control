@@ -16,12 +16,17 @@ func NewWorklogListQuery(issueKey string) WorklogListQuery {
 	}
 }
 
-func (w WorklogListQuery) withstartedAfter(time time.Time) WorklogListQuery {
+func (w WorklogListQuery) WithIssueKey(issueKey string) WorklogListQuery {
+	w.issueKey = issueKey
+	return w
+}
+
+func (w WorklogListQuery) WithStartedAfter(time time.Time) WorklogListQuery {
 	w.startedAfter = time
 	return w
 }
 
-func (w WorklogListQuery) withstartedBefore(time time.Time) WorklogListQuery {
+func (w WorklogListQuery) WithStartedBefore(time time.Time) WorklogListQuery {
 	w.startedBefore = time
 	return w
 }

@@ -1,6 +1,8 @@
 package issue
 
-import issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+import (
+	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+)
 
 type IssueSearchRequest struct {
 	adapter     IssueAdapter
@@ -40,17 +42,27 @@ func NewIssueProject(id string, key string, name string) IssueProject {
 }
 
 type Issue struct {
+	adapter IssueAdapter
 	id      string
 	Project IssueProject
 	Key     string
 	Summary string
 }
 
-func NewIssue(id string, project IssueProject, key string, summary string) Issue {
+func NewIssue(adapter IssueAdapter, id string, project IssueProject, key string, summary string) Issue {
 	return Issue{
+		adapter: adapter,
 		id:      id,
 		Project: project,
 		Key:     key,
 		Summary: summary,
 	}
+}
+
+func (issue Issue) WorklogsQuery() issue_worklog.WorklogListQuery {
+	return issue_worklog.NewWorklogListQuery(issue.Key)
+}
+
+func (issue Issue) Worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error) {
+	return issue.adapter.worklogs(query)
 }

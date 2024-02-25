@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
@@ -20,8 +21,19 @@ func main() {
 	// worklog := issue_worklog.NewWorklog(app.IssueWorklogAdapter, "NC-40", 4.5)
 	// worklog.Log()
 	issueSearchRequest := issue.NewIssueSearchRequest(app.IssueAdapter)
-	issueSearchRequest.Summary = "Staff Meetings"
+	issueSearchRequest.Summary = "Project Management"
 	issues, err := issueSearchRequest.Search()
-	fmt.Println(issues)
+	var issue issue.Issue
+	for _, currentIssue := range issues {
+		if currentIssue.Key == "NXNXTUI-45" {
+			issue = currentIssue
+			break
+		}
+	}
+	startedAfter := time.Now()
+	startedAfter = startedAfter.Add(-4 * 24 * time.Hour)
+	query := issue.WorklogsQuery().WithStartedAfter(startedAfter)
+	worklogs, _ := issue.Worklogs(query)
+	fmt.Println(len(worklogs))
 
 }
