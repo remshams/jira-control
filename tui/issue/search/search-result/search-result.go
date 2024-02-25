@@ -29,6 +29,18 @@ func CreateLogWorkAction(issue jira.Issue) tea.Cmd {
 	}
 }
 
+type ShowWorklogsAction struct {
+	Issue jira.Issue
+}
+
+func CreateShowWorklogsAction(issue jira.Issue) tea.Cmd {
+	return func() tea.Msg {
+		return ShowWorklogsAction{
+			Issue: issue,
+		}
+	}
+}
+
 type SwitchViewAction struct {
 }
 
@@ -83,6 +95,10 @@ var SearchResultKeys = SearchResultKeyMap{
 		key.WithKeys("l"),
 		key.WithHelp("l", "Log work"),
 	),
+	showWorklogs: key.NewBinding(
+		key.WithKeys("w"),
+		key.WithHelp("w", "Show worklogs"),
+	),
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap(),
@@ -128,6 +144,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, SearchResultKeys.switchView):
 			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
+		case key.Matches(msg, SearchResultKeys.showWorklogs):
+			issue := m.findIssue(m.table.SelectedRow()[0])
+			if issue == nil {
+				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
+			}
+			cmd = CreateShowWorklogsAction(*issue)
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, SearchResultKeys.logWork):
