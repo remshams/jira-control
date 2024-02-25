@@ -13,7 +13,7 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
-	issue_home "github.com/remshams/jira-control/tui/issue/search/home"
+	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	issue_search_result "github.com/remshams/jira-control/tui/issue/search/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
