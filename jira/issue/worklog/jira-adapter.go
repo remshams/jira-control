@@ -2,14 +2,15 @@ package issue_worklog
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
+	"github.com/remshams/jira-control/jira/utils"
 )
 
 const path = "rest/api/3/issue/%s/worklog"
@@ -19,10 +20,10 @@ type worklogResponseDto struct {
 	Worklogs []worklogDto `json:"worklogs"`
 }
 
-func (w worklogResponseDto) getWorklogs() []Worklog {
+func (w worklogResponseDto) toWorklogs(issueKey string) []Worklog {
 	var worklogs []Worklog
 	for _, worklog := range w.Worklogs {
-		worklogs = append(worklogs)
+		worklogs = append(worklogs, worklog.toWorklog(issueKey))
 	}
 	return worklogs
 }
@@ -44,14 +45,20 @@ type worklogDto struct {
 	Description      string `json:"description,omitempty"`
 }
 
-func (w worklogDto) toWorklog() Worklog {
-	hoursSpent := w.TimeSpentSeconds / (60 * 60)
+func (w worklogDto) toWorklog(issueKey string) Worklog {
+	hoursSpent := float64(w.TimeSpentSeconds) / 3600
+	start, err := utils.JiraDateToTime(w.Start)
+	if err != nil {
+		log.Errorf("WorklogJiraAdapter: Could not parse start time, falling back to unix start time: %v", err)
+		start = time.Unix(0, 0)
+	}
 	return Worklog{
-		adapter:     nil,
-		issueKey:    "",
-		HoursSpent:  fmt.Sprintf("%d", hoursSpent),
-		Start:       utils_http.ParseStart(w.Start),
-		Description: w.Description,
+		adapter:            nil,
+		issueKey:           issueKey,
+		timeSpentInSeconds: w.TimeSpentSeconds,
+		HoursSpent:         hoursSpent,
+		Start:              start,
+		Description:        w.Description,
 	}
 }
 
@@ -107,6 +114,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 		path.String(),
 		http.MethodPost,
 		headers,
+		[]utils_http.QueryParam{},
 		worklogJson,
 		nil,
 	)
@@ -117,7 +125,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 	return nil
 }
 
-func (w WorklogJiraAdapter) list(query WorklogListQuery) ([]Worklog, error) {
+func (w WorklogJiraAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 	log.Debugf("WorklogJiraAdapter: Requesting worklog with query %v", query)
 	path := w.url.JoinPath(fmt.Sprintf(path, query.issueKey))
 	headers := []utils_http.HttpHeader{
@@ -126,14 +134,15 @@ func (w WorklogJiraAdapter) list(query WorklogListQuery) ([]Worklog, error) {
 	queryParams := []utils_http.QueryParam{
 		{
 			Key:   "startedAfter",
-			Value: fmt.Sprintf("%d", query.startedAfter),
+			Value: strconv.FormatInt(query.startedAfter.UnixMilli(), 10),
 		},
 		{
 			Key:   "startedBefore",
-			Value: fmt.Sprintf("%d", query.startedBefore),
+			Value: strconv.FormatInt(query.startedBefore.UnixMilli(), 10),
 		},
 	}
-	res, worklogResponseJson, err := utils_http.PerformRequest(
+	log.Debugf("WorklogJiraAdapter: Query params %v", queryParams)
+	_, worklogResponseJson, err := utils_http.PerformRequest(
 		"Worklog List",
 		path.String(),
 		http.MethodGet,
@@ -150,5 +159,5 @@ func (w WorklogJiraAdapter) list(query WorklogListQuery) ([]Worklog, error) {
 	if err != nil {
 		return nil, err
 	}
-	return worklogDtoToWorklog(worklogResponseDto.Worklogs), nil
+	return worklogResponseDto.toWorklogs(query.issueKey), nil
 }

@@ -15,7 +15,7 @@ func (w WorklogMockAdatpter) logWork(worklog Worklog) error {
 	return nil
 }
 
-func (w WorklogMockAdatpter) list(issueKey string, query WorklogListQuery) ([]Worklog, error) {
-	log.Debugf("WorklogMockAdapter: Listing worklogs for issue %s", issueKey)
+func (w WorklogMockAdatpter) List(query WorklogListQuery) ([]Worklog, error) {
+	log.Debugf("WorklogMockAdapter: Listing worklogs for query %v", query)
 	return []Worklog{}, nil
 }

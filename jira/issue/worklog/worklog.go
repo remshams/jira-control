@@ -27,16 +27,17 @@ func (w WorklogListQuery) withstartedBefore(time time.Time) WorklogListQuery {
 }
 
 type WorklogAdapter interface {
-	list(issueKey string, query WorklogListQuery) ([]Worklog, error)
+	List(query WorklogListQuery) ([]Worklog, error)
 	logWork(worklog Worklog) error
 }
 
 type Worklog struct {
-	adapter     WorklogAdapter
-	issueKey    string
-	HoursSpent  float64
-	Start       time.Time
-	Description string
+	adapter            WorklogAdapter
+	issueKey           string
+	timeSpentInSeconds int
+	HoursSpent         float64
+	Start              time.Time
+	Description        string
 }
 
 func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Worklog {
