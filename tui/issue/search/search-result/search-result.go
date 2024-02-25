@@ -51,16 +51,18 @@ func CreateSearchResultAction(issues []issue.Issue) tea.Cmd {
 }
 
 type SearchResultKeyMap struct {
-	global     common.GlobalKeyMap
-	help       help.KeyMap
-	table      table.KeyMap
-	logWork    key.Binding
-	switchView key.Binding
+	global       common.GlobalKeyMap
+	help         help.KeyMap
+	table        table.KeyMap
+	showWorklogs key.Binding
+	logWork      key.Binding
+	switchView   key.Binding
 }
 
 func (m SearchResultKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
 		m.logWork,
+		m.showWorklogs,
 		m.switchView,
 		m.help.Help,
 		m.global.Tab.Tab,

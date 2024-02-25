@@ -1,4 +1,4 @@
-package issue_home
+package issue_search_home
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
-	issue_search_form "github.com/remshams/jira-control/tui/issue/search-form"
-	issue_search_result "github.com/remshams/jira-control/tui/issue/search-result"
+	issue_search_form "github.com/remshams/jira-control/tui/issue/search/search-form"
+	issue_search_result "github.com/remshams/jira-control/tui/issue/search/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
