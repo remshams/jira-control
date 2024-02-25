@@ -25,7 +25,7 @@ type Model struct {
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		search:   issue_search_home.New(adapter),
-		worklogs: worklog_list.New([]issue_worklog.Worklog{}),
+		worklogs: worklog_list.New("", []issue_worklog.Worklog{}),
 		state:    stateIssueSearch,
 	}
 }
@@ -50,6 +50,8 @@ func (m *Model) processIssueSearchUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case issue_search_result.ShowWorklogsAction:
 		m.state = stateWorklogs
+		m.worklogs = worklog_list.New(msg.Issue.Key, []issue_worklog.Worklog{})
+		cmd = m.worklogs.Init()
 	default:
 		m.search, cmd = m.search.Update(msg)
 	}
@@ -58,7 +60,13 @@ func (m *Model) processIssueSearchUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processWorklogsUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.worklogs, cmd = m.worklogs.Update(msg)
+	switch msg := msg.(type) {
+	case worklog_list.GoBackAction:
+		m.state = stateIssueSearch
+		cmd = m.search.Init()
+	default:
+		m.worklogs, cmd = m.worklogs.Update(msg)
+	}
 	return cmd
 }
 
