@@ -2,6 +2,7 @@ package worklog_list
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -20,6 +21,39 @@ type GoBackAction struct{}
 
 func CreateGoBackAction() tea.Msg {
 	return GoBackAction{}
+}
+
+type LoadWorklogsSuccessAction struct {
+	Worklogs []jira.Worklog
+}
+
+type LoadWorklogsErrorAction struct{}
+
+func createLoadWorklogsAction(adapter tui_jira.JiraAdapter, issue jira.Issue) tea.Cmd {
+	return func() tea.Msg {
+		worklogsChan := make(chan []jira.Worklog)
+		errorChan := make(chan error)
+		go loadWorklogs(adapter, issue, worklogsChan, errorChan)
+		select {
+		case worklogs := <-worklogsChan:
+			return LoadWorklogsSuccessAction{Worklogs: worklogs}
+		case <-errorChan:
+			return LoadWorklogsErrorAction{}
+		}
+	}
+}
+
+func loadWorklogs(adapter tui_jira.JiraAdapter, issue jira.Issue, worklogsChan chan []jira.Worklog, errorChan chan error) {
+	startedAfter := time.Now()
+	// Load worklogs from the last 2 months
+	startedAfter = startedAfter.Add(-7 * 24 * 4 * 2 * time.Hour)
+	query := issue.WorklogsQuery().WithStartedAfter(startedAfter)
+	worklogs, err := issue.Worklogs(query)
+	if err != nil {
+		errorChan <- err
+	} else {
+		worklogsChan <- worklogs
+	}
 }
 
 type WorklogListKeyMap struct {
@@ -49,21 +83,22 @@ var WorklogListKeys = WorklogListKeyMap{
 const (
 	worklogListStateLoading utils.ViewState = "workLogListStateLoading"
 	worklogListStateLoaded  utils.ViewState = "workLogListStateLoaded"
+	worklogListStateError   utils.ViewState = "workLogListStateError"
 )
 
 type Model struct {
 	adapter  tui_jira.JiraAdapter
-	issueKey string
+	issue    jira.Issue
 	worklogs []jira.Worklog
 	spinner  spinner.Model
 	state    utils.ViewState
 }
 
-func New(adapter tui_jira.JiraAdapter, issueKey string) Model {
+func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
 	spinner := spinner.New(spinner.WithSpinner(spinner.Dot))
 	spinner.Style = lipgloss.NewStyle().Foreground(styles.SelectedColor)
 	return Model{
-		issueKey: issueKey,
+		issue:    issue,
 		worklogs: []jira.Worklog{},
 		spinner:  spinner,
 		state:    worklogListStateLoading,
@@ -72,8 +107,9 @@ func New(adapter tui_jira.JiraAdapter, issueKey string) Model {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
-		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklog List for %s", m.issueKey)),
+		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklog List for %s", m.issue.Key)),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
+		createLoadWorklogsAction(m.adapter, m.issue),
 		m.spinner.Tick,
 	)
 }
@@ -103,7 +139,15 @@ func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
+	switch msg := msg.(type) {
+	case LoadWorklogsSuccessAction:
+		m.worklogs = msg.Worklogs
+		m.state = worklogListStateLoaded
+	case LoadWorklogsErrorAction:
+		m.state = worklogListStateError
+	default:
+		m.spinner, cmd = m.spinner.Update(msg)
+	}
 	return cmd
 }
 
@@ -113,7 +157,9 @@ func (m Model) View() string {
 		styles := lipgloss.NewStyle().Foreground(styles.SelectedColor)
 		return fmt.Sprintf("%s %s", m.spinner.View(), styles.Render("Loading worklogs..."))
 	case worklogListStateLoaded:
-		return ""
+		return fmt.Sprintf("Loaded %d worklogs", len(m.worklogs))
+	case worklogListStateError:
+		return "Error loading worklogs"
 	default:
 		return ""
 	}

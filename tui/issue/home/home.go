@@ -23,9 +23,8 @@ type Model struct {
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
-		search:   issue_search_home.New(adapter),
-		worklogs: worklog_list.New(adapter, ""),
-		state:    stateIssueSearch,
+		search: issue_search_home.New(adapter),
+		state:  stateIssueSearch,
 	}
 }
 
@@ -49,7 +48,7 @@ func (m *Model) processIssueSearchUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case issue_search_result.ShowWorklogsAction:
 		m.state = stateWorklogs
-		m.worklogs = worklog_list.New(m.adapter, msg.Issue.Key)
+		m.worklogs = worklog_list.New(m.adapter, msg.Issue)
 		cmd = m.worklogs.Init()
 	default:
 		m.search, cmd = m.search.Update(msg)
