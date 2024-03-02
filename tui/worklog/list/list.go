@@ -36,8 +36,8 @@ func (m WorklogListKeyMap) FullHelp() [][]key.Binding {
 var WorklogListKeys = WorklogListKeyMap{
 	global: common.GlobalKeys,
 	goBack: key.NewBinding(
-		key.WithKeys("b"),
-		key.WithHelp("b", "Go back"),
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "Go back"),
 	),
 }
 
