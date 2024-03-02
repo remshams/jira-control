@@ -39,7 +39,7 @@ type WorklogAdapter interface {
 type Worklog struct {
 	adapter            WorklogAdapter
 	issueKey           string
-	timeSpentInSeconds int
+	TimeSpentInSeconds int
 	HoursSpent         float64
 	Start              time.Time
 	Description        string

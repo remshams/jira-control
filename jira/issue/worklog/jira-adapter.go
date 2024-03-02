@@ -55,7 +55,7 @@ func (w worklogDto) toWorklog(issueKey string) Worklog {
 	return Worklog{
 		adapter:            nil,
 		issueKey:           issueKey,
-		timeSpentInSeconds: w.TimeSpentSeconds,
+		TimeSpentInSeconds: w.TimeSpentSeconds,
 		HoursSpent:         hoursSpent,
 		Start:              start,
 		Description:        w.Description,
