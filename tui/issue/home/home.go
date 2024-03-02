@@ -3,7 +3,6 @@ package issue_home
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/utils"
-	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 	issue_search_home "github.com/remshams/jira-control/tui/issue/search/home"
 	issue_search_result "github.com/remshams/jira-control/tui/issue/search/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
@@ -25,7 +24,7 @@ type Model struct {
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		search:   issue_search_home.New(adapter),
-		worklogs: worklog_list.New("", []issue_worklog.Worklog{}),
+		worklogs: worklog_list.New(adapter, ""),
 		state:    stateIssueSearch,
 	}
 }
@@ -50,7 +49,7 @@ func (m *Model) processIssueSearchUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case issue_search_result.ShowWorklogsAction:
 		m.state = stateWorklogs
-		m.worklogs = worklog_list.New(msg.Issue.Key, []issue_worklog.Worklog{})
+		m.worklogs = worklog_list.New(m.adapter, msg.Issue.Key)
 		cmd = m.worklogs.Init()
 	default:
 		m.search, cmd = m.search.Update(msg)
