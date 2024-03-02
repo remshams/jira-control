@@ -144,6 +144,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.recalculateTableLayout()
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, WorklogListKeys.help.Help):
@@ -161,8 +163,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	case LoadWorklogsSuccessAction:
 		m.worklogs = msg.Worklogs
 		m.state = worklogListStateLoaded
-		m.table.SetColumns(m.createTableColumns())
-		m.table.SetRows(m.createTableRows())
+		m.recalculateTableLayout()
 	case LoadWorklogsErrorAction:
 		m.state = worklogListStateError
 	default:
@@ -219,4 +220,12 @@ func (m Model) createTableRows() []table.Row {
 		})
 	}
 	return rows
+}
+
+func (m *Model) recalculateTableLayout() {
+	width, height := m.calculateTableDimensions()
+	m.table.SetWidth(width)
+	m.table.SetHeight(height)
+	m.table.SetColumns(m.createTableColumns())
+	m.table.SetRows(m.createTableRows())
 }
