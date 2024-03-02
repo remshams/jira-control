@@ -5,7 +5,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	table_utils "github.com/remshams/common/tui/bubbles/table"
@@ -225,7 +224,6 @@ func (m Model) calculateTableDimensions() (int, int) {
 
 func (m *Model) recalculateTableLayout() {
 	width, height := m.calculateTableDimensions()
-	log.Debugf("width: %d, height: %d", width, height)
 	m.table.SetWidth(width)
 	m.table.SetHeight(height)
 	m.table.SetColumns(m.createTableColumns())
