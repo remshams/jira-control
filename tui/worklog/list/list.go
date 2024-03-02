@@ -193,9 +193,9 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 func (m Model) createTableColumns() []table.Column {
 	tableWidth, _ := m.calculateTableDimensions()
 	return []table.Column{
-		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth)},
-		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth)},
-		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth)},
+		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, nil)},
+		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, nil)},
+		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, nil)},
 	}
 }
 
@@ -203,7 +203,7 @@ func (m Model) calculateTableDimensions() (int, int) {
 	width := app_store.LayoutStore.Width - 5
 	height := app_store.LayoutStore.Height - 8
 	if height < 0 {
-		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height)
+		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height, nil)
 	}
 	return width, height
 }
