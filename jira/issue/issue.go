@@ -24,7 +24,7 @@ func (issueSearchRequest IssueSearchRequest) Search() ([]Issue, error) {
 
 type IssueAdapter interface {
 	searchIssues(request IssueSearchRequest) ([]Issue, error)
-	worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error)
+	worklogs(query issue_worklog.WorklogListQuery) (issue_worklog.WorklogList, error)
 }
 
 type IssueProject struct {
@@ -64,5 +64,9 @@ func (issue Issue) WorklogsQuery() issue_worklog.WorklogListQuery {
 }
 
 func (issue Issue) Worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error) {
-	return issue.adapter.worklogs(query)
+	worklogList, err := issue.adapter.worklogs(query)
+	if err != nil {
+		return nil, err
+	}
+	return worklogList.SortByStart(true), nil
 }

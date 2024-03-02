@@ -151,6 +151,6 @@ func issuesFromDto(adapter JiraIssueAdapter, issuesDto []issueDto) []Issue {
 	return issues
 }
 
-func (jiraIssueAdapter JiraIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error) {
+func (jiraIssueAdapter JiraIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) (issue_worklog.WorklogList, error) {
 	return jiraIssueAdapter.worklogAdapter.List(query)
 }

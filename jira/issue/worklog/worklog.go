@@ -1,11 +1,27 @@
 package issue_worklog
 
-import "time"
+import (
+	"sort"
+	"time"
+)
+
+type WorklogList []Worklog
+
+func (w WorklogList) SortByStart(descending bool) WorklogList {
+	sort.Slice(w, func(i, j int) bool {
+		if descending {
+			return w[i].Start.After(w[j].Start)
+		}
+		return w[i].Start.Before(w[j].Start)
+	})
+	return w
+}
 
 type WorklogListQuery struct {
-	issueKey      string
-	startedAfter  time.Time
-	startedBefore time.Time
+	issueKey       string
+	startedAfter   time.Time
+	startedBefore  time.Time
+	sortDescending bool
 }
 
 func NewWorklogListQuery(issueKey string) WorklogListQuery {
@@ -31,8 +47,13 @@ func (w WorklogListQuery) WithStartedBefore(time time.Time) WorklogListQuery {
 	return w
 }
 
+func (w WorklogListQuery) WithSortDescending(descending bool) WorklogListQuery {
+	w.sortDescending = descending
+	return w
+}
+
 type WorklogAdapter interface {
-	List(query WorklogListQuery) ([]Worklog, error)
+	List(query WorklogListQuery) (WorklogList, error)
 	logWork(worklog Worklog) error
 }
 

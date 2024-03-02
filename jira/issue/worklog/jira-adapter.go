@@ -125,7 +125,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 	return nil
 }
 
-func (w WorklogJiraAdapter) List(query WorklogListQuery) ([]Worklog, error) {
+func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 	log.Debugf("WorklogJiraAdapter: Requesting worklog with query %v", query)
 	path := w.url.JoinPath(fmt.Sprintf(path, query.issueKey))
 	headers := []utils_http.HttpHeader{

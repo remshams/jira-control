@@ -16,6 +16,6 @@ func (m MockIssueAdapter) searchIssues(request IssueSearchRequest) ([]Issue, err
 	}, nil
 }
 
-func (m MockIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) ([]issue_worklog.Worklog, error) {
-	return []issue_worklog.Worklog{}, nil
+func (m MockIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) (issue_worklog.WorklogList, error) {
+	return issue_worklog.WorklogList{}, nil
 }
