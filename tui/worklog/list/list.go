@@ -192,9 +192,11 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 
 func (m Model) createTableColumns() []table.Column {
 	tableWidth, _ := m.calculateTableDimensions()
+	startWidth := 20
+	timeSpentWidth := 10
 	return []table.Column{
-		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, nil)},
-		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, nil)},
+		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, &startWidth)},
+		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, &timeSpentWidth)},
 		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, nil)},
 	}
 }
