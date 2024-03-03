@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	table_utils "github.com/remshams/common/tui/bubbles/table"
+	table_utils "github.com/remshams/common/tui/bubbles/table/utils"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/jira-control/jira/issue"
