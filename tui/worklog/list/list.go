@@ -113,7 +113,7 @@ func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
 		spinner:  spinner,
 		state:    worklogListStateLoading,
 	}
-	model.table = table.New[[]jira.Worklog](createTableColumns, createTableRows, 5, 8)
+	model.table = table.New[[]jira.Worklog](createTableColumns, createTableRows, 5, 10)
 	return model
 }
 
