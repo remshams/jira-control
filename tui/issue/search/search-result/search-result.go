@@ -160,7 +160,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	if len(m.table.Table.Rows()) > 0 {
+	if !m.table.IsEmpty() {
 		return m.table.View()
 	} else {
 		style := lipgloss.NewStyle().
