@@ -194,11 +194,11 @@ func createTableColumns(tableWidth int) []table.Column {
 	}
 }
 
-func createTableRows(values []jira.Worklog) []table.Row {
+func createTableRows(worklogs []jira.Worklog) []table.Row {
 	rows := []table.Row{}
 
-	log.Debugf("Worklogs: %v", len(values))
-	for _, worklog := range values {
+	log.Debugf("Worklogs: %v", len(worklogs))
+	for _, worklog := range worklogs {
 		hoursSpent := math.Ceil(float64(worklog.TimeSpentInSeconds / 3600))
 		rows = append(rows, table.Row{
 			worklog.Start.Format("2006-01-02 15:04"),
