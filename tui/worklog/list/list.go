@@ -152,7 +152,11 @@ func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, WorklogListKeys.goBack):
 			cmd = CreateGoBackAction
+		default:
+			m.table, cmd = m.table.Update(msg)
 		}
+	default:
+		m.table, cmd = m.table.Update(msg)
 	}
 	return cmd
 }
