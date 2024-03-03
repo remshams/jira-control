@@ -137,7 +137,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, SearchResultKeys.switchView):
 			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
 		case key.Matches(msg, SearchResultKeys.showWorklogs):
-			issue := m.findIssue(m.table.Table.SelectedRow()[0])
+			issue := m.findIssue(m.table.SelectedRowCell(0))
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
@@ -145,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, SearchResultKeys.logWork):
-			issue := m.findIssue(m.table.Table.SelectedRow()[0])
+			issue := m.findIssue(m.table.SelectedRowCell(0))
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
