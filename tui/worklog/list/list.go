@@ -119,7 +119,7 @@ func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
-		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklog List for %s", m.issue.Key)),
+		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklogs for %s", m.issue.Key)),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
 		createLoadWorklogsAction(m.adapter, m.issue),
 		m.spinner.Tick(),
