@@ -183,10 +183,10 @@ func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model
 func (m Model) createTableColumns() []table.Column {
 	tableWidth, _ := m.calculateTableDimensions()
 	return []table.Column{
-		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, nil)},
-		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, nil)},
-		{Title: "ProjectName", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth, nil)},
-		{Title: "ProjectKey", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, nil)},
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, styles.UnlimitedDimension)},
+		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, styles.UnlimitedDimension)},
+		{Title: "ProjectName", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth, styles.UnlimitedDimension)},
+		{Title: "ProjectKey", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, styles.UnlimitedDimension)},
 	}
 }
 
@@ -217,7 +217,7 @@ func (m Model) calculateTableDimensions() (int, int) {
 	width := app_store.LayoutStore.Width - 5
 	height := app_store.LayoutStore.Height - 11
 	if height < 0 {
-		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height, nil)
+		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height, styles.UnlimitedDimension)
 	}
 	return width, height
 }
