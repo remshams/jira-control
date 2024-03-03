@@ -1,7 +1,7 @@
 meta {
-  name: Search
+  name: Search Issues
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
@@ -17,7 +17,7 @@ auth:basic {
 
 body:json {
   {
-    "jql": "project = 'NXNXTUI' AND summary ~ 'Project Management'",
-    "fields":["id","key","summary", "assignee"]
+    "jql": "issuekey IN updatedBy('mathias.remshardt@logicline.de') ORDER BY updated DESC",
+    "fields":["id","key","summary", "assignee", "updated"]
   }
 }
