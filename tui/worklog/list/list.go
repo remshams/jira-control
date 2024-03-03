@@ -7,18 +7,17 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	table_utils "github.com/remshams/common/tui/bubbles/table/utils"
+	"github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
-	app_store "github.com/remshams/jira-control/tui/store"
 )
 
 type GoBackAction struct{}
@@ -78,14 +77,14 @@ func (m WorklogListKeyMap) ShortHelp() []key.Binding {
 func (m WorklogListKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		m.ShortHelp(),
-		table_utils.TableKeyBindings(),
+		table.DefaultKeyBindings,
 	}
 }
 
 var WorklogListKeys = WorklogListKeyMap{
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
-	table:  table.DefaultKeyMap(),
+	table:  table.DefaultKeyMap,
 	goBack: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "Go back"),
@@ -103,22 +102,21 @@ type Model struct {
 	issue    jira.Issue
 	worklogs []jira.Worklog
 	spinner  spinner.Model
-	table    table.Model
+	table    table.Model[[]jira.Worklog]
 	state    utils.ViewState
 }
 
 func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
 	spinner := spinner.New(spinner.WithSpinner(spinner.Dot))
 	spinner.Style = lipgloss.NewStyle().Foreground(styles.SelectedColor)
-	return Model{
+	model := Model{
 		issue:    issue,
 		worklogs: []jira.Worklog{},
 		spinner:  spinner,
-		table: table.New(
-			table.WithFocused(true),
-		),
-		state: worklogListStateLoading,
+		state:    worklogListStateLoading,
 	}
+	model.table = table.New[[]jira.Worklog](createTableColumns, createTableRows, 5, 8)
+	return model
 }
 
 func (m Model) Init() tea.Cmd {
@@ -144,8 +142,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.recalculateTableLayout()
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, WorklogListKeys.help.Help):
@@ -167,7 +163,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	case LoadWorklogsSuccessAction:
 		m.worklogs = msg.Worklogs
 		m.state = worklogListStateLoaded
-		m.recalculateTableLayout()
+		cmd = table.CreateTableDataUpdatedAction(m.worklogs)
 	case LoadWorklogsErrorAction:
 		m.state = worklogListStateError
 	default:
@@ -190,12 +186,7 @@ func (m Model) View() string {
 	}
 }
 
-func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model {
-	return table_utils.CreateTable(columns, rows)
-}
-
-func (m Model) createTableColumns() []table.Column {
-	tableWidth, _ := m.calculateTableDimensions()
+func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
 		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
 		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
@@ -203,19 +194,11 @@ func (m Model) createTableColumns() []table.Column {
 	}
 }
 
-func (m Model) calculateTableDimensions() (int, int) {
-	width := app_store.LayoutStore.Width - 5
-	height := app_store.LayoutStore.Height - 8
-	if height < 0 {
-		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height, styles.UnlimitedDimension)
-	}
-	return width, height
-}
-
-func (m Model) createTableRows() []table.Row {
+func createTableRows(values []jira.Worklog) []table.Row {
 	rows := []table.Row{}
 
-	for _, worklog := range m.worklogs {
+	log.Debugf("Worklogs: %v", len(values))
+	for _, worklog := range values {
 		hoursSpent := math.Ceil(float64(worklog.TimeSpentInSeconds / 3600))
 		rows = append(rows, table.Row{
 			worklog.Start.Format("2006-01-02 15:04"),
@@ -224,12 +207,4 @@ func (m Model) createTableRows() []table.Row {
 		})
 	}
 	return rows
-}
-
-func (m *Model) recalculateTableLayout() {
-	width, height := m.calculateTableDimensions()
-	m.table.SetWidth(width)
-	m.table.SetHeight(height)
-	m.table.SetColumns(m.createTableColumns())
-	m.table.SetRows(m.createTableRows())
 }
