@@ -6,12 +6,11 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
@@ -107,8 +106,7 @@ type Model struct {
 }
 
 func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
-	spinner := spinner.New(spinner.WithSpinner(spinner.Dot))
-	spinner.Style = lipgloss.NewStyle().Foreground(styles.SelectedColor)
+	spinner := spinner.New().WithLabel("Loading worklogs...")
 	model := Model{
 		issue:    issue,
 		worklogs: []jira.Worklog{},
@@ -124,7 +122,7 @@ func (m Model) Init() tea.Cmd {
 		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklog List for %s", m.issue.Key)),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
 		createLoadWorklogsAction(m.adapter, m.issue),
-		m.spinner.Tick,
+		m.spinner.Tick(),
 	)
 }
 
@@ -175,8 +173,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 func (m Model) View() string {
 	switch m.state {
 	case worklogListStateLoading:
-		styles := lipgloss.NewStyle().Foreground(styles.SelectedColor)
-		return fmt.Sprintf("%s %s", m.spinner.View(), styles.Render("Loading worklogs..."))
+		return m.spinner.View()
 	case worklogListStateLoaded:
 		return m.table.View()
 	case worklogListStateError:
