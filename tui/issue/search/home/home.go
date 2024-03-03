@@ -3,9 +3,9 @@ package issue_search_home
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
@@ -63,8 +63,7 @@ type Model struct {
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
-	spinner := spinner.New(spinner.WithSpinner(spinner.Dot))
-	spinner.Style = lipgloss.NewStyle().Foreground(styles.SelectedColor)
+	spinner := spinner.New().WithLabel("Loading issues...")
 	return Model{
 		adapter:      adapter,
 		searchForm:   issue_search_form.New(),
@@ -105,7 +104,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
 		searchRequest.Summary = msg.SearchTerm
 		m.state = stateSearchLoading
-		cmd = tea.Batch(m.spinner.Tick, createSearchIssueAction(searchRequest))
+		cmd = tea.Batch(m.spinner.Tick(), createSearchIssueAction(searchRequest))
 	case issue_search_form.SwitchViewAction:
 		m.state = stateSearchResult
 		cmd = m.searchResult.Init()
@@ -156,8 +155,7 @@ func (m Model) View() string {
 
 func (m Model) renderSearchResult() string {
 	if m.state == stateSearchLoading {
-		styles := lipgloss.NewStyle().Foreground(styles.SelectedColor)
-		return fmt.Sprintf("%s %s", m.spinner.View(), styles.Render("Loading issues..."))
+		return m.spinner.View()
 	} else {
 		return m.searchResult.View()
 	}
