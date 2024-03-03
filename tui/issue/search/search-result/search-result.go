@@ -3,7 +3,6 @@ package issue_search_result
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/table"
@@ -12,7 +11,6 @@ import (
 	"github.com/remshams/jira-control/jira/issue"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
-	app_store "github.com/remshams/jira-control/tui/store"
 )
 
 type LogWorkAction struct {
@@ -115,7 +113,9 @@ func New() Model {
 	m := Model{
 		issues: []issue.Issue{},
 	}
-	m.table = table.New(createTableColumns, createTableRows, 5, 11)
+	m.table = table.
+		New(createTableColumns, createTableRows, 5, 11).
+		WithNotDataMessage("No issues")
 	return m
 }
 
@@ -160,15 +160,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	if !m.table.IsEmpty() {
-		return m.table.View()
-	} else {
-		style := lipgloss.NewStyle().
-			Foreground(styles.SelectedColor).
-			Width(app_store.LayoutStore.Width).
-			Align(lipgloss.Center)
-		return style.Render("No issues")
-	}
+	return m.table.View()
 }
 
 func createTableColumns(width int) []table.Column {
