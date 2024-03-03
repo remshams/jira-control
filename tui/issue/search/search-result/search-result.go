@@ -2,12 +2,11 @@ package issue_search_result
 
 import (
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
-	table_utils "github.com/remshams/common/tui/bubbles/table/utils"
+	"github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/jira-control/jira/issue"
@@ -85,7 +84,7 @@ func (m SearchResultKeyMap) ShortHelp() []key.Binding {
 func (m SearchResultKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		m.ShortHelp(),
-		table_utils.TableKeyBindings(),
+		table.DefaultKeyBindings,
 	}
 }
 
@@ -100,7 +99,7 @@ var SearchResultKeys = SearchResultKeyMap{
 	),
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
-	table:  table.DefaultKeyMap(),
+	table:  table.DefaultKeyMap,
 	switchView: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "Switch to search"),
@@ -109,17 +108,14 @@ var SearchResultKeys = SearchResultKeyMap{
 
 type Model struct {
 	issues []issue.Issue
-	table  table.Model
+	table  table.Model[[]issue.Issue]
 }
 
 func New() Model {
 	m := Model{
 		issues: []issue.Issue{},
-		table: table.New(
-			table.WithKeyMap(table.DefaultKeyMap()),
-			table.WithFocused(true),
-		),
 	}
+	m.table = table.New(createTableColumns, createTableRows, 5, 11)
 	return m
 }
 
@@ -133,18 +129,15 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.recalculateTableLayout()
 	case SetSearchResultAction:
 		m.issues = msg.issues
-		m.recalculateTableLayout()
-		m.table.GotoTop()
+		cmd = table.CreateTableDataUpdatedAction(m.issues)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SearchResultKeys.switchView):
 			cmd = tea.Batch(CreateSwitchViewAction(), help.CreateSetKeyMapMsg(SearchResultKeys))
 		case key.Matches(msg, SearchResultKeys.showWorklogs):
-			issue := m.findIssue(m.table.SelectedRow()[0])
+			issue := m.findIssue(m.table.Table.SelectedRow()[0])
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
@@ -152,7 +145,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, SearchResultKeys.logWork):
-			issue := m.findIssue(m.table.SelectedRow()[0])
+			issue := m.findIssue(m.table.Table.SelectedRow()[0])
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
@@ -160,12 +153,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}
+	default:
+		m.table, cmd = m.table.Update(msg)
 	}
 	return m, cmd
 }
 
 func (m Model) View() string {
-	if len(m.table.Rows()) > 0 {
+	if len(m.table.Table.Rows()) > 0 {
 		return m.table.View()
 	} else {
 		style := lipgloss.NewStyle().
@@ -176,24 +171,19 @@ func (m Model) View() string {
 	}
 }
 
-func (m Model) createTable(columns []table.Column, rows []table.Row) table.Model {
-	return table_utils.CreateTable(columns, rows)
-}
-
-func (m Model) createTableColumns() []table.Column {
-	tableWidth, _ := m.calculateTableDimensions()
+func createTableColumns(width int) []table.Column {
 	return []table.Column{
-		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, styles.UnlimitedDimension)},
-		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, styles.UnlimitedDimension)},
-		{Title: "ProjectName", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth, styles.UnlimitedDimension)},
-		{Title: "ProjectKey", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, styles.UnlimitedDimension)},
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, width, styles.UnlimitedDimension)},
+		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(50, width, styles.UnlimitedDimension)},
+		{Title: "ProjectName", Width: styles.CalculateDimensionsFromPercentage(30, width, styles.UnlimitedDimension)},
+		{Title: "ProjectKey", Width: styles.CalculateDimensionsFromPercentage(10, width, styles.UnlimitedDimension)},
 	}
 }
 
-func (m Model) createTableRows() []table.Row {
+func createTableRows(issues []issue.Issue) []table.Row {
 	rows := []table.Row{}
 
-	for _, issue := range m.issues {
+	for _, issue := range issues {
 		rows = append(rows, table.Row{
 			issue.Key,
 			issue.Summary,
@@ -211,21 +201,4 @@ func (m Model) findIssue(key string) *issue.Issue {
 		}
 	}
 	return nil
-}
-
-func (m Model) calculateTableDimensions() (int, int) {
-	width := app_store.LayoutStore.Width - 5
-	height := app_store.LayoutStore.Height - 11
-	if height < 0 {
-		height = styles.CalculateDimensionsFromPercentage(80, app_store.LayoutStore.Height, styles.UnlimitedDimension)
-	}
-	return width, height
-}
-
-func (m *Model) recalculateTableLayout() {
-	width, height := m.calculateTableDimensions()
-	m.table.SetWidth(width)
-	m.table.SetHeight(height)
-	m.table.SetColumns(m.createTableColumns())
-	m.table.SetRows(m.createTableRows())
 }
