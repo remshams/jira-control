@@ -25,6 +25,7 @@ func NewIssueSearchRequest(adapter IssueAdapter) IssueSearchRequest {
 
 func (request IssueSearchRequest) WithProjectName(projectName string) IssueSearchRequest {
 	request.projectName = projectName
+	request.fields = []string{"id", "key", "summary", "updated"}
 	return request
 }
 
@@ -35,11 +36,6 @@ func (request IssueSearchRequest) WithKey(key string) IssueSearchRequest {
 
 func (request IssueSearchRequest) WithSummary(summary string) IssueSearchRequest {
 	request.summary = summary
-	return request
-}
-
-func (request IssueSearchRequest) WithFields(fields []string) IssueSearchRequest {
-	request.fields = fields
 	return request
 }
 

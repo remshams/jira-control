@@ -23,7 +23,6 @@ func main() {
 	issueSearchRequest := issue.NewIssueSearchRequest(app.IssueAdapter)
 	issueSearchRequest = issueSearchRequest.WithUpdatedBy("mathias.remshardt@logicline.de")
 	issueSearchRequest = issueSearchRequest.WithOrderBy(utils.NewOrderBy([]string{"updated"}, utils.SortingDesc))
-	issueSearchRequest = issueSearchRequest.WithFields([]string{"project", "summary", "updated"})
 	issues, err := issueSearchRequest.Search()
 	fmt.Println(issues[0].Project.Updated)
 
