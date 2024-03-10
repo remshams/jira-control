@@ -2,14 +2,21 @@ package issue
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
+
+	"github.com/remshams/jira-control/jira/utils"
+	"github.com/stretchr/testify/assert"
 )
+
+const summary = "summary"
+
+var summaryJql = fmt.Sprintf("summary ~ \"%s\"", summary)
 
 func TestJqlFromSearchRequest_Summary(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.Summary = "summary"
-	expected := fmt.Sprintf("summary ~ \"%s\"", request.Summary)
+	request.Summary = summary
+	expected := summaryJql
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))
 }
@@ -32,13 +39,49 @@ func TestJqlFromSearchRequest_Project(t *testing.T) {
 
 func TestJqlFromSearchRequest_Combined(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.Summary = "summary"
+	request.Summary = summary
 	request.Key = "key"
 	request.ProjectName = "project"
 	expected := fmt.Sprintf(
-		"summary ~ \"%s\" OR key = \"%s\" OR project = \"%s\"",
-		request.Summary, request.Key, request.ProjectName,
+		"%s OR key = \"%s\" OR project = \"%s\"",
+		summaryJql, request.Key, request.ProjectName,
 	)
+
+	assert.Equal(t, expected, jqlFromSearchRequest(request))
+}
+
+func TestJqlFromSearchRequest_UpdatedBy(t *testing.T) {
+	updatedBy := "updatedBy"
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
+	request = request.WithUpdatedBy(updatedBy)
+	expected := fmt.Sprintf("issueKey IN updatedBy(\"%s\")", updatedBy)
+
+	assert.Equal(t, expected, jqlFromSearchRequest(request))
+}
+
+func TestJqlFromSearchRequest_OrderBy(t *testing.T) {
+	orderBy := utils.OrderBy{Fields: []string{"summary"}, Sorting: utils.SortingDesc}
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
+	request = request.WithSummary(summary)
+	request = request.WithOrderBy(orderBy)
+	expected := fmt.Sprintf("%s ORDER BY %s %s", summaryJql, strings.Join(orderBy.Fields, ","), orderBy.Sorting)
+
+	assert.Equal(t, expected, jqlFromSearchRequest(request))
+}
+
+func TestJqlFromSearchRequest_OrderByNoFields(t *testing.T) {
+	orderBy := utils.OrderBy{Sorting: utils.SortingDesc}
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
+	request = request.WithSummary(summary)
+	request = request.WithOrderBy(orderBy)
+	expected := summaryJql
+
+	assert.Equal(t, expected, jqlFromSearchRequest(request))
+}
+
+func TestJqlFromSearchRequest_NoFieldsSelected(t *testing.T) {
+	request := NewIssueSearchRequest(NewMockIssueAdapter())
+	expected := ""
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))
 }

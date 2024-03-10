@@ -2,6 +2,7 @@ package issue
 
 import (
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+	"github.com/remshams/jira-control/jira/utils"
 )
 
 type IssueSearchRequest struct {
@@ -10,12 +11,44 @@ type IssueSearchRequest struct {
 	Key         string
 	Summary     string
 	Fields      []string
+	UpdatedBy   string
+	OrderBy     utils.OrderBy
 }
 
 func NewIssueSearchRequest(adapter IssueAdapter) IssueSearchRequest {
 	return IssueSearchRequest{
 		adapter: adapter,
 	}
+}
+
+func (request IssueSearchRequest) WithProjectName(projectName string) IssueSearchRequest {
+	request.ProjectName = projectName
+	return request
+}
+
+func (request IssueSearchRequest) WithKey(key string) IssueSearchRequest {
+	request.Key = key
+	return request
+}
+
+func (request IssueSearchRequest) WithSummary(summary string) IssueSearchRequest {
+	request.Summary = summary
+	return request
+}
+
+func (request IssueSearchRequest) WithFields(fields []string) IssueSearchRequest {
+	request.Fields = fields
+	return request
+}
+
+func (request IssueSearchRequest) WithUpdatedBy(updatedBy string) IssueSearchRequest {
+	request.UpdatedBy = updatedBy
+	return request
+}
+
+func (request IssueSearchRequest) WithOrderBy(orderBy utils.OrderBy) IssueSearchRequest {
+	request.OrderBy = orderBy
+	return request
 }
 
 func (issueSearchRequest IssueSearchRequest) Search() ([]Issue, error) {

@@ -68,17 +68,28 @@ func fromJson(body []byte) (issueSearchResponseDto, error) {
 }
 
 func jqlFromSearchRequest(request IssueSearchRequest) string {
-	jql := []string{}
+	fields := []string{}
 	if request.Summary != "" {
-		jql = append(jql, fmt.Sprintf("summary ~ \"%s\"", request.Summary))
+		fields = append(fields, fmt.Sprintf("summary ~ \"%s\"", request.Summary))
 	}
 	if request.Key != "" {
-		jql = append(jql, fmt.Sprintf("key = \"%s\"", request.Key))
+		fields = append(fields, fmt.Sprintf("key = \"%s\"", request.Key))
 	}
 	if request.ProjectName != "" {
-		jql = append(jql, fmt.Sprintf("project = \"%s\"", request.ProjectName))
+		fields = append(fields, fmt.Sprintf("project = \"%s\"", request.ProjectName))
 	}
-	return strings.Join(jql, " OR ")
+	if request.UpdatedBy != "" {
+		fields = append(fields, fmt.Sprintf("issueKey IN updatedBy(\"%s\")", request.UpdatedBy))
+	}
+	jql := strings.Join(fields, " OR ")
+	orderBy := ""
+	if jql != "" && request.OrderBy.Fields != nil {
+		orderBy = fmt.Sprintf(" ORDER BY %s %s", strings.Join(request.OrderBy.Fields, ","), request.OrderBy.Sorting)
+	}
+	if jql == "" {
+		log.Error("JiraIssueAdapter: jql is empty")
+	}
+	return fmt.Sprintf("%s%s", jql, orderBy)
 }
 
 type JiraIssueAdapter struct {
