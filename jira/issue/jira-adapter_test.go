@@ -60,7 +60,7 @@ func TestJqlFromSearchRequest_UpdatedBy(t *testing.T) {
 }
 
 func TestJqlFromSearchRequest_OrderBy(t *testing.T) {
-	orderBy := utils.OrderBy{Fields: []string{"summary"}, Sorting: utils.SortingDesc}
+	orderBy := utils.NewOrderBy([]string{"updated"}, utils.SortingDesc)
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request = request.WithSummary(summary)
 	request = request.WithOrderBy(orderBy)
@@ -70,7 +70,7 @@ func TestJqlFromSearchRequest_OrderBy(t *testing.T) {
 }
 
 func TestJqlFromSearchRequest_OrderByNoFields(t *testing.T) {
-	orderBy := utils.OrderBy{Sorting: utils.SortingDesc}
+	orderBy := utils.NewOrderBy([]string{}, utils.SortingDesc)
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
 	request = request.WithSummary(summary)
 	request = request.WithOrderBy(orderBy)

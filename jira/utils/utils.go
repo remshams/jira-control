@@ -18,6 +18,13 @@ type OrderBy struct {
 	Sorting Sorting
 }
 
+func NewOrderBy(fields []string, sorting Sorting) OrderBy {
+	return OrderBy{
+		Fields:  fields,
+		Sorting: sorting,
+	}
+}
+
 func JiraDateToTime(timeString string) (time.Time, error) {
 	t, err := time.Parse(
 		"2006-01-02T15:04:05.999-0700",
