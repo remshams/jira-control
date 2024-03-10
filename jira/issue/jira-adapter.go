@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+	"github.com/remshams/jira-control/jira/utils"
 )
 
 const path = "rest/api/3/search"
@@ -45,6 +46,7 @@ type issueProjectDto struct {
 type issueFieldDto struct {
 	Summary string          `json:"summary"`
 	Project issueProjectDto `json:"project"`
+	Updated string          `json:"updated"`
 }
 
 type issueDto struct {
@@ -61,7 +63,6 @@ func fromJson(body []byte) (issueSearchResponseDto, error) {
 	var issueSearchResponse issueSearchResponseDto
 	err := json.Unmarshal(body, &issueSearchResponse)
 	if err != nil {
-		log.Errorf("JiraIssueAdapter: Could not unmarshal issueSearchResponseDto: %v", err)
 		return issueSearchResponseDto{}, err
 	}
 	return issueSearchResponse, nil
@@ -109,6 +110,7 @@ func NewJiraIssueAdapter(worklogAdapter issue_worklog.WorklogAdapter, url url.UR
 }
 
 func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest) ([]Issue, error) {
+	log.Debugf("JiraIssueAdapter: Searching issues with request %v", request)
 	searchRequestDto, err := fromIssueSearchRequest(request).toJson()
 	if err != nil {
 		return nil, err
@@ -145,6 +147,11 @@ func (jiraIssueAdapter JiraIssueAdapter) searchIssues(request IssueSearchRequest
 func issuesFromDto(adapter JiraIssueAdapter, issuesDto []issueDto) []Issue {
 	issues := []Issue{}
 	for _, issue := range issuesDto {
+		updated, err := utils.JiraDateToTime(issue.Fields.Updated)
+		if err != nil {
+			log.Errorf("JiraIssueAdapter: Could not parse time, falling back to current time %v", err)
+			updated = time.Now()
+		}
 		issues = append(
 			issues,
 			NewIssue(
@@ -154,6 +161,7 @@ func issuesFromDto(adapter JiraIssueAdapter, issuesDto []issueDto) []Issue {
 					issue.Fields.Project.Key,
 					issue.Fields.Project.Key,
 					issue.Fields.Project.Name,
+					updated,
 				),
 				issue.Key,
 				issue.Fields.Summary,

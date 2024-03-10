@@ -1,6 +1,8 @@
 package issue
 
 import (
+	"time"
+
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 	"github.com/remshams/jira-control/jira/utils"
 )
@@ -61,16 +63,18 @@ type IssueAdapter interface {
 }
 
 type IssueProject struct {
-	id   string
-	Key  string
-	Name string
+	id      string
+	Key     string
+	Name    string
+	Updated time.Time
 }
 
-func NewIssueProject(id string, key string, name string) IssueProject {
+func NewIssueProject(id string, key string, name string, updated time.Time) IssueProject {
 	return IssueProject{
-		id:   id,
-		Key:  key,
-		Name: name,
+		id:      id,
+		Key:     key,
+		Name:    name,
+		Updated: updated,
 	}
 }
 
