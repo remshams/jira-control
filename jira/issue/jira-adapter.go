@@ -33,7 +33,7 @@ func (issueSearchRequestDto issueSearchRequestDto) toJson() ([]byte, error) {
 func fromIssueSearchRequest(request IssueSearchRequest) issueSearchRequestDto {
 	return issueSearchRequestDto{
 		Jql:    jqlFromSearchRequest(request),
-		Fields: strings.Join(request.Fields, ","),
+		Fields: strings.Join(request.fields, ","),
 	}
 }
 
@@ -69,22 +69,22 @@ func fromJson(body []byte) (issueSearchResponseDto, error) {
 
 func jqlFromSearchRequest(request IssueSearchRequest) string {
 	fields := []string{}
-	if request.Summary != "" {
-		fields = append(fields, fmt.Sprintf("summary ~ \"%s\"", request.Summary))
+	if request.summary != "" {
+		fields = append(fields, fmt.Sprintf("summary ~ \"%s\"", request.summary))
 	}
-	if request.Key != "" {
-		fields = append(fields, fmt.Sprintf("key = \"%s\"", request.Key))
+	if request.key != "" {
+		fields = append(fields, fmt.Sprintf("key = \"%s\"", request.key))
 	}
-	if request.ProjectName != "" {
-		fields = append(fields, fmt.Sprintf("project = \"%s\"", request.ProjectName))
+	if request.projectName != "" {
+		fields = append(fields, fmt.Sprintf("project = \"%s\"", request.projectName))
 	}
-	if request.UpdatedBy != "" {
-		fields = append(fields, fmt.Sprintf("issueKey IN updatedBy(\"%s\")", request.UpdatedBy))
+	if request.updatedBy != "" {
+		fields = append(fields, fmt.Sprintf("issueKey IN updatedBy(\"%s\")", request.updatedBy))
 	}
 	jql := strings.Join(fields, " OR ")
 	orderBy := ""
-	if jql != "" && request.OrderBy.Fields != nil {
-		orderBy = fmt.Sprintf(" ORDER BY %s %s", strings.Join(request.OrderBy.Fields, ","), request.OrderBy.Sorting)
+	if jql != "" && request.orderBy.Fields != nil {
+		orderBy = fmt.Sprintf(" ORDER BY %s %s", strings.Join(request.orderBy.Fields, ","), request.orderBy.Sorting)
 	}
 	if jql == "" {
 		log.Error("JiraIssueAdapter: jql is empty")

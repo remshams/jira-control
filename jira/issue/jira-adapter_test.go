@@ -15,7 +15,7 @@ var summaryJql = fmt.Sprintf("summary ~ \"%s\"", summary)
 
 func TestJqlFromSearchRequest_Summary(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.Summary = summary
+	request.summary = summary
 	expected := summaryJql
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))
@@ -23,28 +23,28 @@ func TestJqlFromSearchRequest_Summary(t *testing.T) {
 
 func TestJqlFromSearchRequest_Key(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.Key = "key"
-	expected := fmt.Sprintf("key = \"%s\"", request.Key)
+	request.key = "key"
+	expected := fmt.Sprintf("key = \"%s\"", request.key)
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))
 }
 
 func TestJqlFromSearchRequest_Project(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.ProjectName = "project"
-	expected := fmt.Sprintf("project = \"%s\"", request.ProjectName)
+	request.projectName = "project"
+	expected := fmt.Sprintf("project = \"%s\"", request.projectName)
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))
 }
 
 func TestJqlFromSearchRequest_Combined(t *testing.T) {
 	request := NewIssueSearchRequest(NewMockIssueAdapter())
-	request.Summary = summary
-	request.Key = "key"
-	request.ProjectName = "project"
+	request.summary = summary
+	request.key = "key"
+	request.projectName = "project"
 	expected := fmt.Sprintf(
 		"%s OR key = \"%s\" OR project = \"%s\"",
-		summaryJql, request.Key, request.ProjectName,
+		summaryJql, request.key, request.projectName,
 	)
 
 	assert.Equal(t, expected, jqlFromSearchRequest(request))

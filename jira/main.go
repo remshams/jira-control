@@ -21,7 +21,7 @@ func main() {
 	// worklog := issue_worklog.NewWorklog(app.IssueWorklogAdapter, "NC-40", 4.5)
 	// worklog.Log()
 	issueSearchRequest := issue.NewIssueSearchRequest(app.IssueAdapter)
-	issueSearchRequest.Summary = "Project Management"
+	issueSearchRequest = issueSearchRequest.WithSummary("Project Management")
 	issues, err := issueSearchRequest.Search()
 	var issue issue.Issue
 	for _, currentIssue := range issues {

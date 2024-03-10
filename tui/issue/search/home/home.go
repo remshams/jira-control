@@ -102,7 +102,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case issue_search_form.ApplySearchAction:
 		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
-		searchRequest.Summary = msg.SearchTerm
+		searchRequest = searchRequest.WithSummary(msg.SearchTerm)
 		m.state = stateSearchLoading
 		cmd = tea.Batch(m.spinner.Tick(), createSearchIssueAction(searchRequest))
 	case issue_search_form.SwitchViewAction:

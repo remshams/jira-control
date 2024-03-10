@@ -7,12 +7,12 @@ import (
 
 type IssueSearchRequest struct {
 	adapter     IssueAdapter
-	ProjectName string
-	Key         string
-	Summary     string
-	Fields      []string
-	UpdatedBy   string
-	OrderBy     utils.OrderBy
+	projectName string
+	key         string
+	summary     string
+	fields      []string
+	updatedBy   string
+	orderBy     utils.OrderBy
 }
 
 func NewIssueSearchRequest(adapter IssueAdapter) IssueSearchRequest {
@@ -22,32 +22,32 @@ func NewIssueSearchRequest(adapter IssueAdapter) IssueSearchRequest {
 }
 
 func (request IssueSearchRequest) WithProjectName(projectName string) IssueSearchRequest {
-	request.ProjectName = projectName
+	request.projectName = projectName
 	return request
 }
 
 func (request IssueSearchRequest) WithKey(key string) IssueSearchRequest {
-	request.Key = key
+	request.key = key
 	return request
 }
 
 func (request IssueSearchRequest) WithSummary(summary string) IssueSearchRequest {
-	request.Summary = summary
+	request.summary = summary
 	return request
 }
 
 func (request IssueSearchRequest) WithFields(fields []string) IssueSearchRequest {
-	request.Fields = fields
+	request.fields = fields
 	return request
 }
 
 func (request IssueSearchRequest) WithUpdatedBy(updatedBy string) IssueSearchRequest {
-	request.UpdatedBy = updatedBy
+	request.updatedBy = updatedBy
 	return request
 }
 
 func (request IssueSearchRequest) WithOrderBy(orderBy utils.OrderBy) IssueSearchRequest {
-	request.OrderBy = orderBy
+	request.orderBy = orderBy
 	return request
 }
 
