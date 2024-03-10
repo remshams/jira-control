@@ -21,7 +21,7 @@ func main() {
 	// worklog := issue_worklog.NewWorklog(app.IssueWorklogAdapter, "NC-40", 4.5)
 	// worklog.Log()
 	issueSearchRequest := issue.NewIssueSearchRequest(app.IssueAdapter)
-	issueSearchRequest = issueSearchRequest.WithUpdatedBy("mathias.remshardt@logicline.de")
+	issueSearchRequest = issueSearchRequest.WithUpdatedBy(app.Username())
 	issueSearchRequest = issueSearchRequest.WithOrderBy(utils.NewOrderBy([]string{"updated"}, utils.SortingDesc))
 	issues, err := issueSearchRequest.Search()
 	fmt.Println(issues[0].Project.Updated)

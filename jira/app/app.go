@@ -20,6 +20,10 @@ type App struct {
 	IssueWorklogAdapter issue_worklog.WorklogAdapter
 }
 
+func (app App) Username() string {
+	return app.username
+}
+
 func AppFromEnv() (*App, error) {
 	isProduction, err := strconv.ParseBool(os.Getenv("IS_PRODUCTION"))
 	if err != nil {
