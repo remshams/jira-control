@@ -16,6 +16,7 @@ import (
 
 type LastUpdatedKeymap struct {
 	global common.GlobalKeyMap
+	table  table.KeyMap
 }
 
 func (m LastUpdatedKeymap) ShortHelp() []key.Binding {
@@ -25,11 +26,13 @@ func (m LastUpdatedKeymap) ShortHelp() []key.Binding {
 func (m LastUpdatedKeymap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		m.ShortHelp(),
+		table.DefaultKeyBindings,
 	}
 }
 
 var LastUpdatedKeys = LastUpdatedKeymap{
 	global: common.GlobalKeys,
+	table:  table.DefaultKeyMap,
 }
 
 const (
