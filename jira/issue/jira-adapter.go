@@ -17,8 +17,8 @@ const path = "rest/api/3/search"
 const worklogPath = "rest/api/3/issue/%s/worklog"
 
 type issueSearchRequestDto struct {
-	Jql    string `json:"jql"`
-	Fields string `json:"fields,omitempty"`
+	Jql    string   `json:"jql"`
+	Fields []string `json:"fields,omitempty"`
 }
 
 func (issueSearchRequestDto issueSearchRequestDto) toJson() ([]byte, error) {
@@ -33,7 +33,7 @@ func (issueSearchRequestDto issueSearchRequestDto) toJson() ([]byte, error) {
 func fromIssueSearchRequest(request IssueSearchRequest) issueSearchRequestDto {
 	return issueSearchRequestDto{
 		Jql:    jqlFromSearchRequest(request),
-		Fields: strings.Join(request.fields, ","),
+		Fields: request.fields,
 	}
 }
 
