@@ -101,7 +101,7 @@ func (m *Model) processSearchFormUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case issue_search_form.ApplySearchAction:
-		searchRequest := jira.NewIssueSearchRequest(m.adapter.IssueAdapter)
+		searchRequest := jira.NewIssueSearchRequest(m.adapter.App.IssueAdapter)
 		searchRequest = searchRequest.WithSummary(msg.SearchTerm)
 		m.state = stateSearchLoading
 		cmd = tea.Batch(m.spinner.Tick(), createSearchIssueAction(searchRequest))

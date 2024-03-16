@@ -150,7 +150,7 @@ func (m *Model) logWorkInJira() tea.Cmd {
 	if err != nil {
 		return toast.CreateErrorToastAction("Invalid work value")
 	}
-	worklog := jira.NewWorklog(m.adapter.WorklogAdapter, m.issueKey.Input.Value(), hoursSpent)
+	worklog := jira.NewWorklog(m.adapter.App.IssueWorklogAdapter, m.issueKey.Input.Value(), hoursSpent)
 	worklog.Description = m.comment.Input.Value()
 	if m.start.Input.Value() != "" {
 		// Currently only date is supported as start
