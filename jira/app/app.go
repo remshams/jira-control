@@ -12,16 +12,12 @@ import (
 )
 
 type App struct {
-	production          bool
-	url                 url.URL
-	username            string
-	apiToken            string
+	Production          bool
+	Url                 url.URL
+	Username            string
+	ApiToken            string
 	IssueAdapter        issue.IssueAdapter
 	IssueWorklogAdapter issue_worklog.WorklogAdapter
-}
-
-func (app App) Username() string {
-	return app.username
 }
 
 func AppFromEnv() (*App, error) {
@@ -46,10 +42,10 @@ func AppFromEnv() (*App, error) {
 		return nil, errors.New("JIRA_API_TOKEN is not set")
 	}
 	app := App{
-		production: isProduction,
-		url:        *url,
-		username:   username,
-		apiToken:   apiToken,
+		Production: isProduction,
+		Url:        *url,
+		Username:   username,
+		ApiToken:   apiToken,
 	}
 	app.addAdapers()
 	return &app, nil
@@ -57,9 +53,9 @@ func AppFromEnv() (*App, error) {
 
 func (app *App) addAdapers() {
 	var issueAdapter issue.IssueAdapter
-	if app.production == true {
-		app.IssueWorklogAdapter = issue_worklog.NewWorklogJiraAdapter(app.url, app.username, app.apiToken)
-		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.url, app.username, app.apiToken)
+	if app.Production == true {
+		app.IssueWorklogAdapter = issue_worklog.NewWorklogJiraAdapter(app.Url, app.Username, app.ApiToken)
+		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.Url, app.Username, app.ApiToken)
 	} else {
 		issueAdapter = issue.NewMockIssueAdapter()
 		app.IssueAdapter = issueAdapter
