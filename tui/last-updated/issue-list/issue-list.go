@@ -108,7 +108,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		adapter: adapter,
 		table: table.
-			New(createTableColumns, createTableRows, 5, 10).
+			New(createTableColumns, createTableRows, 0, 10).
 			WithNotDataMessage("No issues"),
 		spinner: spinner.New().WithLabel("Loading issues"),
 		state:   lastUpdatedListStateLoading,
@@ -188,7 +188,8 @@ func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
 		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(20, tableWidth, 20)},
 		{Title: "Updated", Width: styles.CalculateDimensionsFromPercentage(20, tableWidth, 20)},
-		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(60, tableWidth, styles.UnlimitedDimension)},
+		{Title: "Project Name", Width: styles.CalculateDimensionsFromPercentage(20, tableWidth, 20)},
+		{Title: "Summary", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, styles.UnlimitedDimension)},
 	}
 }
 
@@ -199,6 +200,7 @@ func createTableRows(issues []jira.Issue) []table.Row {
 		rows = append(rows, table.Row{
 			issue.Key,
 			issue.Project.Updated.Format("2006-01-02 15:04:05"),
+			issue.Project.Name,
 			issue.Summary,
 		})
 	}
