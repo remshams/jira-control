@@ -14,11 +14,10 @@ import (
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
-	issue_search_result "github.com/remshams/jira-control/tui/issue/search/search-result"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	tui_last_updated "github.com/remshams/jira-control/tui/last-updated/home"
 	app_store "github.com/remshams/jira-control/tui/store"
-	"github.com/remshams/jira-control/tui/worklog/details"
+	worklog_details "github.com/remshams/jira-control/tui/worklog/details"
 )
 
 const (
@@ -120,7 +119,7 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case issue_search_result.LogWorkAction:
+	case common.LogWorkAction:
 		m.state = stateWorklog
 		cmd = tea.Batch(
 			tabs.CreateSelectTabAction(0),

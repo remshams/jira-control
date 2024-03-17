@@ -13,18 +13,6 @@ import (
 	common "github.com/remshams/jira-control/tui/_common"
 )
 
-type LogWorkAction struct {
-	Issue jira.Issue
-}
-
-func CreateLogWorkAction(issue jira.Issue) tea.Cmd {
-	return func() tea.Msg {
-		return LogWorkAction{
-			Issue: issue,
-		}
-	}
-}
-
 type ShowWorklogsAction struct {
 	Issue jira.Issue
 }
@@ -149,7 +137,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
-			cmd = CreateLogWorkAction(*issue)
+			cmd = common.CreateLogWorkAction(*issue)
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}
