@@ -14,6 +14,46 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type loadIssuesSuccessAction struct {
+	issues []jira.Issue
+}
+
+func createLoadIssuesSuccessAction(issues []jira.Issue) tea.Msg {
+	return loadIssuesSuccessAction{
+		issues: issues,
+	}
+}
+
+type loadIssuesErrorAction struct{}
+
+func createLoadIssuesAction(adapter tui_jira.JiraAdapter) tea.Cmd {
+	return func() tea.Msg {
+		issuesChan := make(chan []jira.Issue)
+		errorChan := make(chan error)
+		go loadIssues(adapter, issuesChan, errorChan)
+		select {
+		case issues := <-issuesChan:
+			return createLoadIssuesSuccessAction(issues)
+		case <-errorChan:
+			return loadIssuesErrorAction{}
+		}
+	}
+}
+
+func loadIssues(adapter tui_jira.JiraAdapter, issuesChan chan []jira.Issue, errorChan chan error) {
+	defer close(issuesChan)
+	defer close(errorChan)
+	issueSearchRequest := jira.NewIssueSearchRequest(adapter.App.IssueAdapter).
+		WithOrderBy(jira.NewOrderBy([]string{"updated"}, jira.SortingDesc)).
+		WithUpdatedBy(adapter.App.Username)
+	issues, err := issueSearchRequest.Search()
+	if err != nil {
+		errorChan <- err
+	} else {
+		issuesChan <- issues
+	}
+}
+
 type LastUpdatedKeymap struct {
 	global common.GlobalKeyMap
 	table  table.KeyMap
@@ -45,6 +85,7 @@ type Model struct {
 	table   table.Model[[]jira.Issue]
 	spinner spinner.Model
 	state   utils.ViewState
+	issues  []jira.Issue
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
@@ -55,11 +96,17 @@ func New(adapter tui_jira.JiraAdapter) Model {
 			WithNotDataMessage("No issues"),
 		spinner: spinner.New().WithLabel("Loading issues"),
 		state:   lastUpdatedListStateLoading,
+		issues:  []jira.Issue{},
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(title.CreateSetPageTitleMsg("Last Updated Issues"), help.CreateSetKeyMapMsg(LastUpdatedKeys), m.spinner.Tick())
+	return tea.Batch(
+		title.CreateSetPageTitleMsg("Last Updated Issues"),
+		help.CreateSetKeyMapMsg(LastUpdatedKeys),
+		m.spinner.Tick(),
+		createLoadIssuesAction(m.adapter),
+	)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -75,7 +122,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
+	switch msg := msg.(type) {
+	case loadIssuesSuccessAction:
+		m.state = lastUpdatedListStateLoaded
+		cmd = table.CreateTableDataUpdatedAction(msg.issues)
+	default:
+		m.spinner, cmd = m.spinner.Update(msg)
+	}
 	return cmd
 }
 
