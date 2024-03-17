@@ -66,6 +66,7 @@ type LastUpdatedKeymap struct {
 func (m LastUpdatedKeymap) ShortHelp() []key.Binding {
 	keyBindings := []key.Binding{
 		m.logWork,
+		m.reload,
 	}
 	return append(keyBindings, m.global.KeyBindings()...)
 }
@@ -83,6 +84,10 @@ var LastUpdatedKeys = LastUpdatedKeymap{
 	logWork: key.NewBinding(
 		key.WithKeys("l"),
 		key.WithHelp("l", "log work"),
+	),
+	reload: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reload"),
 	),
 }
 
@@ -156,6 +161,9 @@ func (m *Model) proccessLoadedUpdate(msg tea.Msg) tea.Cmd {
 			} else {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
+		case key.Matches(msg, LastUpdatedKeys.reload):
+			m.state = lastUpdatedListStateLoading
+			cmd = tea.Batch(m.spinner.Tick(), createLoadIssuesAction(m.adapter))
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}
