@@ -7,10 +7,12 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
+	common_issue "github.com/remshams/jira-control/tui/_common/issue"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
@@ -55,12 +57,17 @@ func loadIssues(adapter tui_jira.JiraAdapter, issuesChan chan []jira.Issue, erro
 }
 
 type LastUpdatedKeymap struct {
-	global common.GlobalKeyMap
-	table  table.KeyMap
+	global  common.GlobalKeyMap
+	table   table.KeyMap
+	logWork key.Binding
+	reload  key.Binding
 }
 
 func (m LastUpdatedKeymap) ShortHelp() []key.Binding {
-	return m.global.KeyBindings()
+	keyBindings := []key.Binding{
+		m.logWork,
+	}
+	return append(keyBindings, m.global.KeyBindings()...)
 }
 
 func (m LastUpdatedKeymap) FullHelp() [][]key.Binding {
@@ -73,6 +80,10 @@ func (m LastUpdatedKeymap) FullHelp() [][]key.Binding {
 var LastUpdatedKeys = LastUpdatedKeymap{
 	global: common.GlobalKeys,
 	table:  table.DefaultKeyMap,
+	logWork: key.NewBinding(
+		key.WithKeys("l"),
+		key.WithHelp("l", "log work"),
+	),
 }
 
 const (
@@ -125,6 +136,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case loadIssuesSuccessAction:
 		m.state = lastUpdatedListStateLoaded
+		m.issues = msg.issues
 		cmd = table.CreateTableDataUpdatedAction(msg.issues)
 	default:
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -134,7 +146,22 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) proccessLoadedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.table, cmd = m.table.Update(msg)
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, LastUpdatedKeys.logWork):
+			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
+			if issue != nil {
+				cmd = common_issue.CreateLogWorkAction(*issue)
+			} else {
+				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
+			}
+		default:
+			m.table, cmd = m.table.Update(msg)
+		}
+	default:
+		m.table, cmd = m.table.Update(msg)
+	}
 	return cmd
 }
 

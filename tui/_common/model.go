@@ -2,9 +2,7 @@ package common
 
 import (
 	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/bubbles/tabs"
-	jira "github.com/remshams/jira-control/jira/public"
 )
 
 type GlobalKeyMap struct {
@@ -24,17 +22,5 @@ func (k GlobalKeyMap) KeyBindings() []key.Binding {
 	return []key.Binding{
 		k.Tab.Tab,
 		k.Quit,
-	}
-}
-
-type LogWorkAction struct {
-	Issue jira.Issue
-}
-
-func CreateLogWorkAction(issue jira.Issue) tea.Cmd {
-	return func() tea.Msg {
-		return LogWorkAction{
-			Issue: issue,
-		}
 	}
 }

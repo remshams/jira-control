@@ -13,6 +13,7 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
+	common_issue "github.com/remshams/jira-control/tui/_common/issue"
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	tui_last_updated "github.com/remshams/jira-control/tui/last-updated/home"
@@ -111,7 +112,7 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 	case stateWorklog:
 		m.worklog, cmd = m.worklog.Update(msg)
 	case stateLastUpdated:
-		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
+		cmd = m.processLastUpdatedUpdate(msg)
 	}
 	return cmd
 }
@@ -119,16 +120,33 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case common.LogWorkAction:
-		m.state = stateWorklog
-		cmd = tea.Batch(
-			tabs.CreateSelectTabAction(0),
-			m.worklog.Init(),
-			worklog_details.CreateSetIssueKeyAction(msg.Issue.Key),
-		)
+	case common_issue.LogWorkAction:
+		cmd = m.logWork(msg.Issue.Key)
 	default:
 		m.issue, cmd = m.issue.Update(msg)
 	}
+	return cmd
+}
+
+func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case common_issue.LogWorkAction:
+		cmd = m.logWork(msg.Issue.Key)
+	default:
+		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
+	}
+	return cmd
+}
+
+func (m *Model) logWork(issueKey string) tea.Cmd {
+	var cmd tea.Cmd
+	m.state = stateWorklog
+	cmd = tea.Batch(
+		tabs.CreateSelectTabAction(0),
+		m.worklog.Init(),
+		worklog_details.CreateSetIssueKeyAction(issueKey),
+	)
 	return cmd
 }
 
