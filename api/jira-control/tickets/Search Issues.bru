@@ -17,7 +17,7 @@ auth:basic {
 
 body:json {
   {
-    "jql": "issuekey IN updatedBy('mathias.remshardt@logicline.de') ORDER BY updated DESC",
-    "fields":["id","key","summary", "assignee", "updated"]
+    "jql": "issueKey IN updatedBy('mathias.remshardt@logicline.de') ORDER BY updated DESC",
+    "fields":["id","key","summary", "assignee", "updated", "project"]
   }
 }
