@@ -9,22 +9,9 @@ import (
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/jira-control/jira/issue"
-	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 	common_issue "github.com/remshams/jira-control/tui/_common/issue"
 )
-
-type ShowWorklogsAction struct {
-	Issue jira.Issue
-}
-
-func CreateShowWorklogsAction(issue jira.Issue) tea.Cmd {
-	return func() tea.Msg {
-		return ShowWorklogsAction{
-			Issue: issue,
-		}
-	}
-}
 
 type SwitchViewAction struct {
 }
@@ -130,7 +117,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
-			cmd = CreateShowWorklogsAction(*issue)
+			cmd = common_issue.CreateShowWorklogsAction(*issue)
 		case key.Matches(msg, SearchResultKeys.help.Help):
 			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, SearchResultKeys.logWork):
