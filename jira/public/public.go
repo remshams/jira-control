@@ -2,6 +2,7 @@ package jira
 
 import (
 	"github.com/remshams/jira-control/jira/app"
+	"github.com/remshams/jira-control/jira/favorite"
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 	"github.com/remshams/jira-control/jira/utils"
@@ -16,6 +17,7 @@ type Issue = issue.Issue
 type IssueSearchRequest = issue.IssueSearchRequest
 type OrderBy = utils.OrderBy
 type Sorting = utils.Sorting
+type Favorite = favorite.Favorite
 type App = app.App
 
 const (
