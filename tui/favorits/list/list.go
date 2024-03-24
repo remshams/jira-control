@@ -16,6 +16,35 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type LoadFavoritesSuccessAction struct {
+	Favorites []jira.Favorite
+}
+
+type LoadFavoritesErrorAction struct{}
+
+func createLoadFavoritesAction(adapter tui_jira.JiraAdapter) tea.Cmd {
+	return func() tea.Msg {
+		favoritesChan := make(chan []jira.Favorite)
+		errorChan := make(chan error)
+		go loadFavorites(adapter, favoritesChan, errorChan)
+		select {
+		case favorites := <-favoritesChan:
+			return LoadFavoritesSuccessAction{Favorites: favorites}
+		case <-errorChan:
+			return LoadFavoritesErrorAction{}
+		}
+	}
+}
+
+func loadFavorites(adapter tui_jira.JiraAdapter, favoritesChan chan []jira.Favorite, errorChan chan error) {
+	favorites, err := adapter.App.FavoriteAdapter.Load()
+	if err != nil {
+		errorChan <- err
+	} else {
+		favoritesChan <- favorites
+	}
+}
+
 type FavoritesKeymap struct {
 	global common.GlobalKeyMap
 	table  table.KeyMap
@@ -71,6 +100,7 @@ func (m Model) Init() tea.Cmd {
 		title.CreateSetPageTitleMsg("Favorites"),
 		help.CreateSetKeyMapMsg(FavoritesKeys),
 		m.spinner.Tick(),
+		createLoadFavoritesAction(m.adapter),
 	)
 }
 
@@ -87,7 +117,15 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
+	switch msg := msg.(type) {
+	case LoadFavoritesSuccessAction:
+		m.state = favoritesStateLoaded
+		cmd = table.CreateTableDataUpdatedAction(msg.Favorites)
+	case LoadFavoritesErrorAction:
+		m.state = favoritesStateError
+	default:
+		m.spinner, cmd = m.spinner.Update(msg)
+	}
 	return cmd
 }
 
@@ -103,6 +141,8 @@ func (m Model) View() string {
 		return m.spinner.View()
 	case favoritesStateLoaded:
 		return m.table.View()
+	case favoritesStateError:
+		return "Error loading favorites"
 	default:
 		return ""
 	}
@@ -110,10 +150,10 @@ func (m Model) View() string {
 
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
-		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
 		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
-		{Title: "Last Updated At", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
-		{Title: "Created At", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
+		{Title: "Last Updated At", Width: styles.CalculateDimensionsFromPercentage(25, tableWidth, 20)},
+		{Title: "Created At", Width: styles.CalculateDimensionsFromPercentage(25, tableWidth, 20)},
 	}
 }
 
