@@ -14,6 +14,7 @@ import (
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
 	common_issue "github.com/remshams/jira-control/tui/_common/issue"
+	favorite_home "github.com/remshams/jira-control/tui/favorits/home"
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	tui_last_updated "github.com/remshams/jira-control/tui/last-updated/home"
@@ -25,6 +26,7 @@ const (
 	stateIssue       utils.ViewState = "issue"
 	stateWorklog     utils.ViewState = "worklog"
 	stateLastUpdated utils.ViewState = "last_updated"
+	stateFavorites   utils.ViewState = "favorites"
 )
 
 type Model struct {
@@ -36,13 +38,14 @@ type Model struct {
 	issue       issue_home.Model
 	worklog     worklog_details.Model
 	lastUpdated tui_last_updated.Model
+	favorites   favorite_home.Model
 	state       utils.ViewState
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		tab: tabs.New(
-			[]string{"Worklog", "Issues", "Last Updated"},
+			[]string{"Worklog", "Issues", "Last Updated", "Favorites"},
 		),
 		title:       title.New(),
 		toast:       toast.New(),
@@ -50,6 +53,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		worklog:     worklog_details.New(adapter),
 		issue:       issue_home.New(adapter),
 		lastUpdated: tui_last_updated.New(adapter),
+		favorites:   favorite_home.New(adapter),
 		state:       stateWorklog,
 	}
 }
@@ -100,6 +104,9 @@ func (m *Model) processTab(msg tabs.TabSelectedMsg) tea.Cmd {
 	case 2:
 		cmd = m.lastUpdated.Init()
 		m.state = stateLastUpdated
+	case 3:
+		cmd = m.favorites.Init()
+		m.state = stateFavorites
 	}
 	return cmd
 }
@@ -175,6 +182,8 @@ func (m Model) renderContent() string {
 		return style.Render(m.worklog.View())
 	case stateLastUpdated:
 		return style.Render(m.lastUpdated.View())
+	case stateFavorites:
+		return style.Render(m.favorites.View())
 	default:
 		return "View does not exist"
 	}
