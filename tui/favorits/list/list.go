@@ -1,23 +1,64 @@
 package favorite_list
 
 import (
+	"fmt"
+
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/styles"
+	jira "github.com/remshams/jira-control/jira/public"
+	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type FavoritesKeymap struct {
+	global common.GlobalKeyMap
+	table  table.KeyMap
+	help   help.KeyMap
+}
+
+func (m FavoritesKeymap) ShortHelp() []key.Binding {
+	keyBindings := []key.Binding{
+		m.help.Help,
+	}
+	return append(keyBindings, m.global.KeyBindings()...)
+}
+
+func (m FavoritesKeymap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		m.ShortHelp(),
+		table.DefaultKeyBindings,
+	}
+}
+
+var FavoritesKeys = FavoritesKeymap{
+	help:   help.HelpKeys,
+	table:  table.DefaultKeyMap,
+	global: common.GlobalKeys,
+}
+
 type Model struct {
 	adapter tui_jira.JiraAdapter
+	table   table.Model[[]jira.Favorite]
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		adapter: adapter,
+		table: table.
+			New(createTableColumns, createTableRows, 5, 10).
+			WithNotDataMessage("No favorites"),
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	return title.CreateSetPageTitleMsg("Favorites")
+	return tea.Batch(
+		title.CreateSetPageTitleMsg("Favorites"),
+		help.CreateSetKeyMapMsg(FavoritesKeys),
+	)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -26,5 +67,28 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return "Favorites"
+	return m.table.View()
+}
+
+func createTableColumns(tableWidth int) []table.Column {
+	return []table.Column{
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Last Updated At", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
+		{Title: "Created At", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
+	}
+}
+
+func createTableRows(favorits []jira.Favorite) []table.Row {
+	timeFormat := "2006-01-02 15:04"
+	rows := []table.Row{}
+	for _, favorite := range favorits {
+		rows = append(rows, table.Row{
+			favorite.IssueKey,
+			fmt.Sprintf("%d h", int(favorite.HoursSpent)),
+			favorite.LastUsedAt.Format(timeFormat),
+			favorite.CreatedAt.Format(timeFormat),
+		})
+	}
+	return rows
 }
