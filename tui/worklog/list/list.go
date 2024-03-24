@@ -31,11 +31,11 @@ type LoadWorklogsSuccessAction struct {
 
 type LoadWorklogsErrorAction struct{}
 
-func createLoadWorklogsAction(adapter tui_jira.JiraAdapter, issue jira.Issue) tea.Cmd {
+func createLoadWorklogsAction(issue jira.Issue) tea.Cmd {
 	return func() tea.Msg {
 		worklogsChan := make(chan []jira.Worklog)
 		errorChan := make(chan error)
-		go loadWorklogs(adapter, issue, worklogsChan, errorChan)
+		go loadWorklogs(issue, worklogsChan, errorChan)
 		select {
 		case worklogs := <-worklogsChan:
 			return LoadWorklogsSuccessAction{Worklogs: worklogs}
@@ -45,7 +45,7 @@ func createLoadWorklogsAction(adapter tui_jira.JiraAdapter, issue jira.Issue) te
 	}
 }
 
-func loadWorklogs(adapter tui_jira.JiraAdapter, issue jira.Issue, worklogsChan chan []jira.Worklog, errorChan chan error) {
+func loadWorklogs(issue jira.Issue, worklogsChan chan []jira.Worklog, errorChan chan error) {
 	startedAfter := time.Now()
 	// Load worklogs from the last 2 months
 	startedAfter = startedAfter.Add(-7 * 24 * 4 * 2 * time.Hour)
@@ -114,7 +114,7 @@ func New(adapter tui_jira.JiraAdapter, issue jira.Issue) Model {
 		state:    worklogListStateLoading,
 	}
 	model.table = table.
-		New[[]jira.Worklog](createTableColumns, createTableRows, 5, 10).
+		New(createTableColumns, createTableRows, 5, 10).
 		WithNotDataMessage("No worklogs")
 	return model
 }
@@ -123,7 +123,7 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		title.CreateSetPageTitleMsg(fmt.Sprintf("Worklogs for %s", m.issue.Key)),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
-		createLoadWorklogsAction(m.adapter, m.issue),
+		createLoadWorklogsAction(m.issue),
 		m.spinner.Tick(),
 	)
 }
@@ -144,8 +144,6 @@ func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, WorklogListKeys.help.Help):
-			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, WorklogListKeys.goBack):
 			cmd = CreateGoBackAction
 		default:

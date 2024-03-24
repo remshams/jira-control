@@ -118,8 +118,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
 			cmd = common_issue.CreateShowWorklogsAction(*issue)
-		case key.Matches(msg, SearchResultKeys.help.Help):
-			cmd = help.CreateToggleFullHelpMsg()
 		case key.Matches(msg, SearchResultKeys.logWork):
 			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
 			if issue == nil {
