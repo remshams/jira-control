@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/charmbracelet/log"
+	"github.com/remshams/jira-control/jira/favorite"
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
@@ -18,6 +19,7 @@ type App struct {
 	ApiToken            string
 	IssueAdapter        issue.IssueAdapter
 	IssueWorklogAdapter issue_worklog.WorklogAdapter
+	FavoriteAdapter     favorite.FavoriteAdapter
 }
 
 func AppFromEnv() (*App, error) {
@@ -56,9 +58,11 @@ func (app *App) addAdapers() {
 	if app.Production == true {
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogJiraAdapter(app.Url, app.Username, app.ApiToken)
 		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.Url, app.Username, app.ApiToken)
+		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 	} else {
 		issueAdapter = issue.NewMockIssueAdapter()
 		app.IssueAdapter = issueAdapter
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
+		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 	}
 }
