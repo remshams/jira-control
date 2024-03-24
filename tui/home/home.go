@@ -120,6 +120,8 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 		m.worklog, cmd = m.worklog.Update(msg)
 	case stateLastUpdated:
 		cmd = m.processLastUpdatedUpdate(msg)
+	case stateFavorites:
+		cmd = m.processFavoritesUpdate(msg)
 	}
 	return cmd
 }
@@ -143,6 +145,12 @@ func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
 	default:
 		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
 	}
+	return cmd
+}
+
+func (m *Model) processFavoritesUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	m.favorites, cmd = m.favorites.Update(msg)
 	return cmd
 }
 
