@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
+	"github.com/remshams/jira-control/jira/favorite"
 	jira "github.com/remshams/jira-control/jira/public"
 )
 
@@ -15,11 +16,13 @@ func main() {
 		log.Errorf("Could not create JiraAdapter: %v", err)
 		os.Exit(1)
 	}
-	favorites, err := app.FavoriteAdapter.Load()
-	favorite := favorites[0]
-	favorite.HoursSpent = 10.5
-	// favorite := favorite.NewFavorite(app.FavoriteAdapter, "NX-Testing", 9)
-	err = favorite.Store()
+	// favorites, err := app.FavoriteAdapter.Load()
+	// favorite1 := favorites[0]
+	// favorite1.HoursSpent = 10.5
+	favorite1 := favorite.NewFavorite(app.FavoriteAdapter, "NX-Testing3", 9)
+	favorite2 := favorite.NewFavorite(app.FavoriteAdapter, "NX-Testing4", 10)
+	err = favorite1.Store()
+	err = favorite2.Store()
 	if err != nil {
 		log.Errorf("Could not store favorite: %v", err)
 		os.Exit(1)
