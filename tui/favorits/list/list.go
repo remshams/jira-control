@@ -163,7 +163,7 @@ func createTableRows(favorits []jira.Favorite) []table.Row {
 	for _, favorite := range favorits {
 		rows = append(rows, table.Row{
 			favorite.IssueKey,
-			fmt.Sprintf("%d h", int(favorite.HoursSpent)),
+			fmt.Sprintf("%.1f h", favorite.HoursSpent),
 			favorite.LastUsedAt.Format(timeFormat),
 			favorite.CreatedAt.Format(timeFormat),
 		})
