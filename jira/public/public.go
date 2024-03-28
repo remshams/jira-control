@@ -45,6 +45,10 @@ func NewOrderBy(fields []string, sorting utils.Sorting) OrderBy {
 	return utils.NewOrderBy(fields, sorting)
 }
 
+func NewFavorite(adapter favorite.FavoriteAdapter, issueKey string, hoursSpent float64) Favorite {
+	return favorite.NewFavorite(adapter, issueKey, hoursSpent)
+}
+
 func PrepareApplication() (*app.App, error) {
 	return app.AppFromEnv()
 }
