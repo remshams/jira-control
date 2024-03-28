@@ -37,6 +37,7 @@ type keyMap struct {
 	cursor    cursor.KeyMap
 	textinput textinput.KeyMap
 	save      key.Binding
+	favorite  key.Binding
 }
 
 var worklogKeys = keyMap{
@@ -47,17 +48,21 @@ var worklogKeys = keyMap{
 		key.WithKeys("s"),
 		key.WithHelp("s", "save"),
 	),
+	favorite: key.NewBinding(
+		key.WithKeys("f"),
+		key.WithHelp("f", "favorite"),
+	),
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{
+	keyBindings := []key.Binding{
 		k.cursor.Up,
 		k.cursor.Down,
 		textinput.TextInputKeyMap.Edit,
 		k.save,
-		k.global.Tab.Tab,
-		k.global.Quit,
+		k.favorite,
 	}
+	return append(keyBindings, k.global.KeyBindings()...)
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
@@ -111,6 +116,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 				m.state = edit
 			case key.Matches(msg, worklogKeys.save):
 				cmd = m.logWorkInJira()
+			case key.Matches(msg, worklogKeys.favorite):
+				cmd = m.addToFavorite()
 			default:
 				m.cursor = m.cursor.Update(msg)
 			}
@@ -170,6 +177,19 @@ func (m *Model) logWorkInJira() tea.Cmd {
 		return toast.CreateErrorToastAction("Could not save worklog in jira")
 	}
 	return toast.CreateSuccessToastAction("Worklog updated")
+}
+
+func (m *Model) addToFavorite() tea.Cmd {
+	if m.issueKey.Input.Value() == "" && m.work.Input.Value() == "" {
+		return toast.CreateErrorToastAction("Issue key and work are required")
+	}
+	hoursSpent, err := strconv.ParseFloat(m.work.Input.Value(), 64)
+	if err != nil {
+		return toast.CreateErrorToastAction("Invalid work value")
+	}
+	favorite := jira.NewFavorite(m.adapter.App.FavoriteAdapter, m.issueKey.Input.Value(), hoursSpent)
+	favorite.Store()
+	return toast.CreateSuccessToastAction("Favorite saved")
 }
 
 func (m Model) View() string {
