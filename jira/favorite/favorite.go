@@ -36,3 +36,16 @@ func NewFavorite(adapter FavoriteAdapter, issueKey string, hoursSpent float64) F
 func (f Favorite) Store() error {
 	return f.adapter.Store(f)
 }
+
+func (f Favorite) IsEqual(compare Favorite) bool {
+	return f.IssueKey == compare.IssueKey && f.HoursSpent == compare.HoursSpent && f.Comment == compare.Comment
+}
+
+func (f Favorite) DoesFavoriteAlreadyExist(favorites []Favorite) bool {
+	for _, favorite := range favorites {
+		if f.IsEqual(favorite) {
+			return true
+		}
+	}
+	return false
+}

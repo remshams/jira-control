@@ -121,6 +121,9 @@ func (f FavoriteJsonAdapter) Store(favorite Favorite) error {
 	if err != nil {
 		return err
 	}
+	if favorite.DoesFavoriteAlreadyExist(favorites) {
+		return nil
+	}
 	favorites = replaceOrAddFavoriteInList(favorites, favorite)
 	favorites = sortByLastUsedAt(favorites)
 	favoriteJson, err := favoritesToJson(favorites)
