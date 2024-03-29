@@ -18,6 +18,12 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type InitAction struct{}
+
+func createInitAction() tea.Msg {
+	return InitAction{}
+}
+
 type LoadFavoritesSuccessAction struct {
 	Favorites []jira.Favorite
 }
@@ -110,17 +116,23 @@ func (m Model) Init() tea.Cmd {
 		title.CreateSetPageTitleMsg("Favorites"),
 		help.CreateSetKeyMapMsg(FavoritesKeys),
 		m.spinner.Tick(),
-		createLoadFavoritesAction(m.adapter),
+		createInitAction,
 	)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch m.state {
-	case favoritesStateLoading:
-		cmd = m.processLoadingUpdate(msg)
-	case favoritesStateLoaded:
-		cmd = m.processLoadedUpdate(msg)
+	switch msg.(type) {
+	case InitAction:
+		m.state = favoritesStateLoading
+		cmd = createLoadFavoritesAction(m.adapter)
+	default:
+		switch m.state {
+		case favoritesStateLoading:
+			cmd = m.processLoadingUpdate(msg)
+		case favoritesStateLoaded:
+			cmd = m.processLoadedUpdate(msg)
+		}
 	}
 	return m, cmd
 }
