@@ -11,6 +11,7 @@ import (
 	"github.com/remshams/jira-control/jira/issue"
 	common "github.com/remshams/jira-control/tui/_common"
 	common_issue "github.com/remshams/jira-control/tui/_common/issue"
+	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
 )
 
 type SwitchViewAction struct {
@@ -117,13 +118,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
-			cmd = common_issue.CreateShowWorklogsAction(*issue)
+			cmd = common_worklog.CreateShowWorklogsAction(*issue)
 		case key.Matches(msg, SearchResultKeys.logWork):
 			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
-			cmd = common_issue.CreateLogWorkAction(*issue)
+			cmd = common_worklog.CreateLogWorkAction(*issue)
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}

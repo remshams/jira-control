@@ -13,6 +13,7 @@ import (
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 	common_issue "github.com/remshams/jira-control/tui/_common/issue"
+	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
@@ -157,7 +158,7 @@ func (m *Model) proccessLoadedUpdate(msg tea.Msg) tea.Cmd {
 		case key.Matches(msg, LastUpdatedKeys.logWork):
 			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
 			if issue != nil {
-				cmd = common_issue.CreateLogWorkAction(*issue)
+				cmd = common_worklog.CreateLogWorkAction(*issue)
 			} else {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}

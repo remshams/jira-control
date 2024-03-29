@@ -13,7 +13,7 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	common "github.com/remshams/jira-control/tui/_common"
-	common_issue "github.com/remshams/jira-control/tui/_common/issue"
+	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
 	favorite_home "github.com/remshams/jira-control/tui/favorits/home"
 	issue_home "github.com/remshams/jira-control/tui/issue/home"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
@@ -129,7 +129,7 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case common_issue.LogWorkAction:
+	case common_worklog.LogWorkAction:
 		cmd = m.logWork(msg.Issue.Key)
 	default:
 		m.issue, cmd = m.issue.Update(msg)
@@ -140,7 +140,7 @@ func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case common_issue.LogWorkAction:
+	case common_worklog.LogWorkAction:
 		cmd = m.logWork(msg.Issue.Key)
 	default:
 		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
