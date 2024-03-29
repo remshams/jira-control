@@ -6,13 +6,15 @@ import (
 )
 
 type LogWorkAction struct {
-	IssueKey string
+	IssueKey   string
+	HoursSpent *float64
 }
 
-func CreateLogWorkAction(issueKey string) tea.Cmd {
+func CreateLogWorkAction(issueKey string, hoursSpent *float64) tea.Cmd {
 	return func() tea.Msg {
 		return LogWorkAction{
-			IssueKey: issueKey,
+			IssueKey:   issueKey,
+			HoursSpent: hoursSpent,
 		}
 	}
 }

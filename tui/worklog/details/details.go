@@ -32,6 +32,18 @@ func CreateSetIssueKeyAction(issueKey string) tea.Cmd {
 	}
 }
 
+type SetHoursSpentAction struct {
+	HoursSpent float64
+}
+
+func CreateHoursSpentAction(hoursSpent float64) tea.Cmd {
+	return func() tea.Msg {
+		return SetHoursSpentAction{
+			HoursSpent: hoursSpent,
+		}
+	}
+}
+
 type keyMap struct {
 	global    common.GlobalKeyMap
 	cursor    cursor.KeyMap
@@ -108,6 +120,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SetIssueKeyAction:
 		m.issueKey.Input.SetValue(msg.IssueKey)
+	case SetHoursSpentAction:
+		m.work.Input.SetValue(fmt.Sprintf("%.1f", msg.HoursSpent))
 	case tea.KeyMsg:
 		if m.state == navigate {
 			switch {

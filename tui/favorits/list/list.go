@@ -150,7 +150,7 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 			if favorite == nil {
 				cmd = toast.CreateErrorToastAction("Selected favorite could not be found")
 			} else {
-				cmd = common_worklog.CreateLogWorkAction(favorite.IssueKey)
+				cmd = common_worklog.CreateLogWorkAction(favorite.IssueKey, &favorite.HoursSpent)
 			}
 		default:
 			m.table, cmd = m.table.Update(msg)

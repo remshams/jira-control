@@ -130,7 +130,7 @@ func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case common_worklog.LogWorkAction:
-		cmd = m.logWork(msg.IssueKey)
+		cmd = m.logWork(msg.IssueKey, nil)
 	default:
 		m.issue, cmd = m.issue.Update(msg)
 	}
@@ -141,7 +141,7 @@ func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case common_worklog.LogWorkAction:
-		cmd = m.logWork(msg.IssueKey)
+		cmd = m.logWork(msg.IssueKey, nil)
 	default:
 		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
 	}
@@ -152,14 +152,14 @@ func (m *Model) processFavoritesUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case common_worklog.LogWorkAction:
-		cmd = m.logWork(msg.IssueKey)
+		cmd = m.logWork(msg.IssueKey, msg.HoursSpent)
 	default:
 		m.favorites, cmd = m.favorites.Update(msg)
 	}
 	return cmd
 }
 
-func (m *Model) logWork(issueKey string) tea.Cmd {
+func (m *Model) logWork(issueKey string, hoursSpent *float64) tea.Cmd {
 	var cmd tea.Cmd
 	m.state = stateWorklog
 	cmd = tea.Batch(
@@ -167,6 +167,9 @@ func (m *Model) logWork(issueKey string) tea.Cmd {
 		m.worklog.Init(),
 		worklog_details.CreateSetIssueKeyAction(issueKey),
 	)
+	if hoursSpent != nil {
+		cmd = tea.Batch(cmd, worklog_details.CreateHoursSpentAction(*hoursSpent))
+	}
 	return cmd
 }
 
