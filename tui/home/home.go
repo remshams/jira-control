@@ -130,7 +130,7 @@ func (m *Model) processIssueUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case common_worklog.LogWorkAction:
-		cmd = m.logWork(msg.Issue.Key)
+		cmd = m.logWork(msg.IssueKey)
 	default:
 		m.issue, cmd = m.issue.Update(msg)
 	}
@@ -141,7 +141,7 @@ func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case common_worklog.LogWorkAction:
-		cmd = m.logWork(msg.Issue.Key)
+		cmd = m.logWork(msg.IssueKey)
 	default:
 		m.lastUpdated, cmd = m.lastUpdated.Update(msg)
 	}

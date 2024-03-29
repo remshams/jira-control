@@ -124,7 +124,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if issue == nil {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
-			cmd = common_worklog.CreateLogWorkAction(*issue)
+			cmd = common_worklog.CreateLogWorkAction(issue.Key)
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}

@@ -158,7 +158,7 @@ func (m *Model) proccessLoadedUpdate(msg tea.Msg) tea.Cmd {
 		case key.Matches(msg, LastUpdatedKeys.logWork):
 			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
 			if issue != nil {
-				cmd = common_worklog.CreateLogWorkAction(*issue)
+				cmd = common_worklog.CreateLogWorkAction(issue.Key)
 			} else {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}

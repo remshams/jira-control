@@ -6,13 +6,13 @@ import (
 )
 
 type LogWorkAction struct {
-	Issue jira.Issue
+	IssueKey string
 }
 
-func CreateLogWorkAction(issue jira.Issue) tea.Cmd {
+func CreateLogWorkAction(issueKey string) tea.Cmd {
 	return func() tea.Msg {
 		return LogWorkAction{
-			Issue: issue,
+			IssueKey: issueKey,
 		}
 	}
 }
