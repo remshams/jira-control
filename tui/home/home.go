@@ -150,7 +150,12 @@ func (m *Model) processLastUpdatedUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processFavoritesUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.favorites, cmd = m.favorites.Update(msg)
+	switch msg := msg.(type) {
+	case common_worklog.LogWorkAction:
+		cmd = m.logWork(msg.IssueKey)
+	default:
+		m.favorites, cmd = m.favorites.Update(msg)
+	}
 	return cmd
 }
 

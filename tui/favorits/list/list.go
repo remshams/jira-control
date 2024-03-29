@@ -9,10 +9,12 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
+	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
@@ -46,13 +48,15 @@ func loadFavorites(adapter tui_jira.JiraAdapter, favoritesChan chan []jira.Favor
 }
 
 type FavoritesKeymap struct {
-	global common.GlobalKeyMap
-	table  table.KeyMap
-	help   help.KeyMap
+	global  common.GlobalKeyMap
+	logWork key.Binding
+	table   table.KeyMap
+	help    help.KeyMap
 }
 
 func (m FavoritesKeymap) ShortHelp() []key.Binding {
 	keyBindings := []key.Binding{
+		m.logWork,
 		m.help.Help,
 	}
 	return append(keyBindings, m.global.KeyBindings()...)
@@ -66,6 +70,10 @@ func (m FavoritesKeymap) FullHelp() [][]key.Binding {
 }
 
 var FavoritesKeys = FavoritesKeymap{
+	logWork: key.NewBinding(
+		key.WithKeys("l"),
+		key.WithHelp("l", "Log work"),
+	),
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap,
 	global: common.GlobalKeys,
@@ -78,10 +86,11 @@ const (
 )
 
 type Model struct {
-	adapter tui_jira.JiraAdapter
-	table   table.Model[[]jira.Favorite]
-	spinner spinner.Model
-	state   utils.ViewState
+	adapter   tui_jira.JiraAdapter
+	table     table.Model[[]jira.Favorite]
+	spinner   spinner.Model
+	state     utils.ViewState
+	favorites []jira.Favorite
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
@@ -90,8 +99,9 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		table: table.
 			New(createTableColumns, createTableRows, 5, 10).
 			WithNotDataMessage("No favorites"),
-		spinner: spinner.New().WithLabel("Loading favorites..."),
-		state:   favoritesStateLoading,
+		spinner:   spinner.New().WithLabel("Loading favorites..."),
+		state:     favoritesStateLoading,
+		favorites: []jira.Favorite{},
 	}
 }
 
@@ -120,7 +130,8 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case LoadFavoritesSuccessAction:
 		m.state = favoritesStateLoaded
-		cmd = table.CreateTableDataUpdatedAction(msg.Favorites)
+		m.favorites = msg.Favorites
+		cmd = table.CreateTableDataUpdatedAction(m.favorites)
 	case LoadFavoritesErrorAction:
 		m.state = favoritesStateError
 	default:
@@ -131,8 +142,32 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.table, cmd = m.table.Update(msg)
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, FavoritesKeys.logWork):
+			favorite := m.findFavorite(m.table.SelectedRowCell(0))
+			if favorite == nil {
+				cmd = toast.CreateErrorToastAction("Selected favorite could not be found")
+			} else {
+				cmd = common_worklog.CreateLogWorkAction(favorite.IssueKey)
+			}
+		default:
+			m.table, cmd = m.table.Update(msg)
+		}
+	default:
+		m.table, cmd = m.table.Update(msg)
+	}
 	return cmd
+}
+
+func (m Model) findFavorite(id string) *jira.Favorite {
+	for _, favorite := range m.favorites {
+		if favorite.Id.String() == id {
+			return &favorite
+		}
+	}
+	return nil
 }
 
 func (m Model) View() string {
@@ -150,7 +185,8 @@ func (m Model) View() string {
 
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
-		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
+		{Title: "Id", Width: styles.CalculateDimensionsFromPercentage(5, tableWidth, 5)},
+		{Title: "Key", Width: styles.CalculateDimensionsFromPercentage(35, tableWidth, 20)},
 		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
 		{Title: "Last Updated At", Width: styles.CalculateDimensionsFromPercentage(25, tableWidth, 20)},
 		{Title: "Created At", Width: styles.CalculateDimensionsFromPercentage(25, tableWidth, 20)},
@@ -162,6 +198,7 @@ func createTableRows(favorits []jira.Favorite) []table.Row {
 	rows := []table.Row{}
 	for _, favorite := range favorits {
 		rows = append(rows, table.Row{
+			favorite.Id.String(),
 			favorite.IssueKey,
 			fmt.Sprintf("%.1f h", favorite.HoursSpent),
 			favorite.LastUsedAt.Format(timeFormat),
