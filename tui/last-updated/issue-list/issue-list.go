@@ -58,15 +58,17 @@ func loadIssues(adapter tui_jira.JiraAdapter, issuesChan chan []jira.Issue, erro
 }
 
 type LastUpdatedKeymap struct {
-	global  common.GlobalKeyMap
-	table   table.KeyMap
-	logWork key.Binding
-	reload  key.Binding
+	global       common.GlobalKeyMap
+	table        table.KeyMap
+	logWork      key.Binding
+	showWorklogs key.Binding
+	reload       key.Binding
 }
 
 func (m LastUpdatedKeymap) ShortHelp() []key.Binding {
 	keyBindings := []key.Binding{
 		m.logWork,
+		m.showWorklogs,
 		m.reload,
 	}
 	return append(keyBindings, m.global.KeyBindings()...)
@@ -85,6 +87,10 @@ var LastUpdatedKeys = LastUpdatedKeymap{
 	logWork: key.NewBinding(
 		key.WithKeys("l"),
 		key.WithHelp("l", "log work"),
+	),
+	showWorklogs: key.NewBinding(
+		key.WithKeys("w"),
+		key.WithHelp("w", "show worklogs"),
 	),
 	reload: key.NewBinding(
 		key.WithKeys("r"),
@@ -159,6 +165,13 @@ func (m *Model) proccessLoadedUpdate(msg tea.Msg) tea.Cmd {
 			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
 			if issue != nil {
 				cmd = common_worklog.CreateLogWorkAction(issue.Key, nil)
+			} else {
+				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
+			}
+		case key.Matches(msg, LastUpdatedKeys.showWorklogs):
+			issue := common_issue.FindIssue(m.issues, m.table.SelectedRowCell(0))
+			if issue != nil {
+				cmd = common_worklog.CreateShowWorklogsAction(*issue)
 			} else {
 				cmd = toast.CreateErrorToastAction("Selected issue could not be found")
 			}
