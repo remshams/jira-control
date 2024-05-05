@@ -54,15 +54,13 @@ func AppFromEnv() (*App, error) {
 }
 
 func (app *App) addAdapers() {
-	var issueAdapter issue.IssueAdapter
 	if app.Production == true {
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogJiraAdapter(app.Url, app.Username, app.ApiToken)
 		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.Url, app.Username, app.ApiToken)
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 	} else {
-		issueAdapter = issue.NewMockIssueAdapter()
-		app.IssueAdapter = issueAdapter
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
+		app.IssueAdapter = issue.NewMockIssueAdapter(app.IssueWorklogAdapter)
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 	}
 }

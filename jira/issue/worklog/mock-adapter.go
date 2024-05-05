@@ -7,6 +7,7 @@ import (
 type WorklogMockAdapter struct{}
 
 func NewWorklogMockAdapter() WorklogMockAdapter {
+	log.Debugf("Create worklog mock adapter")
 	return WorklogMockAdapter{}
 }
 
@@ -17,7 +18,10 @@ func (w WorklogMockAdapter) logWork(worklog Worklog) error {
 
 func (w WorklogMockAdapter) List(query WorklogListQuery) (WorklogList, error) {
 	log.Debugf("WorklogMockAdapter: Listing worklogs for query %v", query)
-	return []Worklog{}, nil
+	return []Worklog{{
+		adapter: w,
+		Id:      "1234",
+	}}, nil
 }
 
 func (w WorklogMockAdapter) DeleteWorklog(worklog Worklog) error {

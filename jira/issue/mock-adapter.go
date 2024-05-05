@@ -6,10 +6,14 @@ import (
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 )
 
-type MockIssueAdapter struct{}
+type MockIssueAdapter struct {
+	worklogAdapter issue_worklog.WorklogAdapter
+}
 
-func NewMockIssueAdapter() MockIssueAdapter {
-	return MockIssueAdapter{}
+func NewMockIssueAdapter(worklogAdapter issue_worklog.WorklogAdapter) MockIssueAdapter {
+	return MockIssueAdapter{
+		worklogAdapter,
+	}
 }
 
 func (m MockIssueAdapter) searchIssues(request IssueSearchRequest) ([]Issue, error) {
@@ -21,5 +25,5 @@ func (m MockIssueAdapter) searchIssues(request IssueSearchRequest) ([]Issue, err
 }
 
 func (m MockIssueAdapter) worklogs(query issue_worklog.WorklogListQuery) (issue_worklog.WorklogList, error) {
-	return issue_worklog.WorklogList{}, nil
+	return m.worklogAdapter.List(query)
 }
