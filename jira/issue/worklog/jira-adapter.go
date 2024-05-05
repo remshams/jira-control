@@ -13,7 +13,8 @@ import (
 	"github.com/remshams/jira-control/jira/utils"
 )
 
-const path = "rest/api/3/issue/%s/worklog"
+const issuePath = "rest/api/3/issue/%s/worklog"
+const deleteWorklogPath = "rest/api/3/worklog/%s"
 
 type worklogResponseDto struct {
 	Total    int          `json:"total"`
@@ -99,7 +100,7 @@ func NewWorklogJiraAdapter(url url.URL, username string, apiToken string) Worklo
 
 func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 	log.Debugf("WorklogJiraAdapter: Logging work %v", worklog)
-	path := w.url.JoinPath(fmt.Sprintf(path, worklog.issueKey))
+	path := w.url.JoinPath(fmt.Sprintf(issuePath, worklog.issueKey))
 	worklogJson, err := worklogDtoFromWorklog(worklog).toJson()
 	if err != nil {
 		return err
@@ -129,7 +130,7 @@ func (w WorklogJiraAdapter) logWork(worklog Worklog) error {
 
 func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 	log.Debugf("WorklogJiraAdapter: Requesting worklog with query %v", query)
-	path := w.url.JoinPath(fmt.Sprintf(path, query.issueKey))
+	path := w.url.JoinPath(fmt.Sprintf(issuePath, query.issueKey))
 	headers := []utils_http.HttpHeader{
 		utils_http.CreateBasicAuthHeader(w.username, w.apiToken),
 	}
@@ -165,5 +166,23 @@ func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 }
 
 func (w WorklogJiraAdapter) DeleteWorklog(worklog Worklog) error {
+	path := w.url.JoinPath(fmt.Sprintf(deleteWorklogPath, worklog.Id))
+	headers := []utils_http.HttpHeader{
+		utils_http.CreateBasicAuthHeader(w.username, w.apiToken),
+	}
+	log.Debugf("WorklogJiraAdapter: Perform worklog delete for %s", worklog.Id)
+	_, _, err := utils_http.PerformRequest(
+		"Worklog Delete",
+		path.String(),
+		http.MethodDelete,
+		headers,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		log.Errorf("WorklogJiraAdapter: Could not delete worklog %s", worklog.Id)
+		return err
+	}
 	return nil
 }

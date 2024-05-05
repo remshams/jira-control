@@ -81,3 +81,7 @@ func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Wor
 func (w Worklog) Log() error {
 	return (w.adapter).logWork(w)
 }
+
+func (w Worklog) Delete() error {
+	return w.adapter.DeleteWorklog(w)
+}
