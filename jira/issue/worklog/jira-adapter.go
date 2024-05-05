@@ -21,10 +21,10 @@ type worklogResponseDto struct {
 	Worklogs []worklogDto `json:"worklogs"`
 }
 
-func (w worklogResponseDto) toWorklogs(issueKey string) []Worklog {
+func (w worklogResponseDto) toWorklogs(issueKey string, adapter WorklogAdapter) []Worklog {
 	var worklogs []Worklog
 	for _, worklog := range w.Worklogs {
-		worklogs = append(worklogs, worklog.toWorklog(issueKey))
+		worklogs = append(worklogs, worklog.toWorklog(issueKey, adapter))
 	}
 	return worklogs
 }
@@ -47,7 +47,7 @@ type worklogDto struct {
 	Description      string `json:"description,omitempty"`
 }
 
-func (w worklogDto) toWorklog(issueKey string) Worklog {
+func (w worklogDto) toWorklog(issueKey string, adapter WorklogAdapter) Worklog {
 	hoursSpent := float64(w.TimeSpentSeconds) / 3600
 	start, err := utils.JiraDateToTime(w.Start)
 	if err != nil {
@@ -55,7 +55,7 @@ func (w worklogDto) toWorklog(issueKey string) Worklog {
 		start = time.Unix(0, 0)
 	}
 	return Worklog{
-		adapter:            nil,
+		adapter:            adapter,
 		issueKey:           issueKey,
 		Id:                 w.ID,
 		TimeSpentInSeconds: w.TimeSpentSeconds,
@@ -162,7 +162,7 @@ func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 	if err != nil {
 		return nil, err
 	}
-	return worklogResponseDto.toWorklogs(query.issueKey), nil
+	return worklogResponseDto.toWorklogs(query.issueKey, w), nil
 }
 
 func (w WorklogJiraAdapter) DeleteWorklog(worklog Worklog) error {
