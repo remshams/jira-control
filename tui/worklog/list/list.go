@@ -184,9 +184,10 @@ func (m Model) View() string {
 
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
+		{Title: "Id", Width: styles.CalculateDimensionsFromPercentage(20, tableWidth, 20)},
 		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
 		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
-		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, styles.UnlimitedDimension)},
+		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth, styles.UnlimitedDimension)},
 	}
 }
 
@@ -196,6 +197,7 @@ func createTableRows(worklogs []jira.Worklog) []table.Row {
 	log.Debugf("Worklogs: %v", len(worklogs))
 	for _, worklog := range worklogs {
 		rows = append(rows, table.Row{
+			worklog.Id,
 			worklog.Start.Format("2006-01-02 15:04"),
 			fmt.Sprintf("%.1f h", worklog.HoursSpent),
 			worklog.Description,
