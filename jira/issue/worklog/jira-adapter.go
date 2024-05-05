@@ -14,7 +14,7 @@ import (
 )
 
 const issuePath = "rest/api/3/issue/%s/worklog"
-const deleteWorklogPath = "rest/api/3/worklog/%s"
+const deleteWorklogPath = "rest/api/3/issue/%s/worklog/%s"
 
 type worklogResponseDto struct {
 	Total    int          `json:"total"`
@@ -166,7 +166,7 @@ func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 }
 
 func (w WorklogJiraAdapter) DeleteWorklog(worklog Worklog) error {
-	path := w.url.JoinPath(fmt.Sprintf(deleteWorklogPath, worklog.Id))
+	path := w.url.JoinPath(fmt.Sprintf(deleteWorklogPath, worklog.issueKey, worklog.Id))
 	headers := []utils_http.HttpHeader{
 		utils_http.CreateBasicAuthHeader(w.username, w.apiToken),
 	}
