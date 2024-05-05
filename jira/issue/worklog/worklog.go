@@ -28,7 +28,7 @@ func NewWorklogListQuery(issueKey string) WorklogListQuery {
 	return WorklogListQuery{
 		issueKey:      issueKey,
 		startedAfter:  time.Now(),
-		startedBefore: time.Now(),
+		startedBefore: time.Now().Add(time.Duration(time.Hour * 24)),
 	}
 }
 
