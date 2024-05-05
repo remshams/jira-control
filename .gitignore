@@ -1,3 +1,4 @@
 web/tmp/
 web/bin/
 favorites.json
+env.sh

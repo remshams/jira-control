@@ -2,7 +2,6 @@ package worklog_list
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -196,10 +195,9 @@ func createTableRows(worklogs []jira.Worklog) []table.Row {
 
 	log.Debugf("Worklogs: %v", len(worklogs))
 	for _, worklog := range worklogs {
-		hoursSpent := math.Ceil(float64(worklog.TimeSpentInSeconds / 3600))
 		rows = append(rows, table.Row{
 			worklog.Start.Format("2006-01-02 15:04"),
-			fmt.Sprintf("%d h", int(hoursSpent)),
+			fmt.Sprintf("%.1f h", worklog.HoursSpent),
 			worklog.Description,
 		})
 	}
