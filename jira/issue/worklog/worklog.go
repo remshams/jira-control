@@ -55,6 +55,7 @@ func (w WorklogListQuery) WithSortDescending(descending bool) WorklogListQuery {
 type WorklogAdapter interface {
 	List(query WorklogListQuery) (WorklogList, error)
 	logWork(worklog Worklog) error
+	DeleteWorklog(worklog Worklog) error
 }
 
 type Worklog struct {

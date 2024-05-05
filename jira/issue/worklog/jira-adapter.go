@@ -163,3 +163,7 @@ func (w WorklogJiraAdapter) List(query WorklogListQuery) (WorklogList, error) {
 	}
 	return worklogResponseDto.toWorklogs(query.issueKey), nil
 }
+
+func (w WorklogJiraAdapter) DeleteWorklog(worklog Worklog) error {
+	return nil
+}

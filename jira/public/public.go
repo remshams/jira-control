@@ -10,7 +10,7 @@ import (
 
 type Worklog = issue_worklog.Worklog
 type WorklogAdapter = issue_worklog.WorklogAdapter
-type WorklogMockAdapter = issue_worklog.WorklogMockAdatpter
+type WorklogMockAdapter = issue_worklog.WorklogMockAdapter
 type WorklogJiraAdapter = issue_worklog.WorklogJiraAdapter
 type IssueAdapter = issue.IssueAdapter
 type Issue = issue.Issue
@@ -30,7 +30,7 @@ func NewWorklogJiraAdapter() WorklogJiraAdapter {
 }
 
 func NewWorklogMockAdapter() WorklogMockAdapter {
-	return issue_worklog.WorklogMockAdatpter{}
+	return issue_worklog.WorklogMockAdapter{}
 }
 
 func NewWorklog(adapter WorklogAdapter, issueKey string, hoursSpent float64) Worklog {
