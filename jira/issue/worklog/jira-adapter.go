@@ -39,6 +39,7 @@ func worklogResponseDtoFromJson(worklogResponseJson []byte) (*worklogResponseDto
 }
 
 type worklogDto struct {
+	ID               string `json:"id,omitempty"`
 	TimeSpent        string `json:"timeSpent"`
 	TimeSpentSeconds int    `json:"timeSpentSeconds,omitempty"`
 	Start            string `json:"started,omitempty"`
@@ -55,6 +56,7 @@ func (w worklogDto) toWorklog(issueKey string) Worklog {
 	return Worklog{
 		adapter:            nil,
 		issueKey:           issueKey,
+		Id:                 w.ID,
 		TimeSpentInSeconds: w.TimeSpentSeconds,
 		HoursSpent:         hoursSpent,
 		Start:              start,
