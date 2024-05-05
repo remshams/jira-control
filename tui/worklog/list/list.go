@@ -11,6 +11,7 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
@@ -61,12 +62,14 @@ type WorklogListKeyMap struct {
 	global common.GlobalKeyMap
 	help   help.KeyMap
 	table  table.KeyMap
+	delete key.Binding
 	goBack key.Binding
 }
 
 func (m WorklogListKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
 		m.help.Help,
+		m.delete,
 		m.goBack,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
@@ -83,6 +86,10 @@ var WorklogListKeys = WorklogListKeyMap{
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap,
+	delete: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "Delete worklog"),
+	),
 	goBack: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "Go back"),
@@ -143,6 +150,8 @@ func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, WorklogListKeys.delete):
+			cmd = m.deleteWorklog(m.table.SelectedRowCell(0))
 		case key.Matches(msg, WorklogListKeys.goBack):
 			cmd = CreateGoBackAction
 		default:
@@ -167,6 +176,19 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 		m.spinner, cmd = m.spinner.Update(msg)
 	}
 	return cmd
+}
+
+func (m *Model) deleteWorklog(id string) tea.Cmd {
+	for _, worklog := range m.worklogs {
+		if worklog.Id == id {
+			err := worklog.Delete()
+			if err != nil {
+				return toast.CreateErrorToastAction("Worklog could not be deleted")
+			}
+			return tea.Batch(toast.CreateSuccessToastAction("Worklog deleted"), createLoadWorklogsAction(m.issue))
+		}
+	}
+	return toast.CreateInfoToastAction("Worklog not found")
 }
 
 func (m Model) View() string {
