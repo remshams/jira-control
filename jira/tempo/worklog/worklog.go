@@ -35,17 +35,19 @@ type WorklistAdapter interface {
 }
 
 type Worklog struct {
-	IssueKey           string
-	Id                 string
+	IssueKey           int
+	Id                 int
 	TimeSpentInSeconds int
-	HoursSpent         float64
+	BillableSeconds    int
+	Start              time.Time
 }
 
-func NewWorklog(issueKey string, id string, timeSpentInSeconds int, hoursSpent float64) Worklog {
+func NewWorklog(issueKey int, id int, timeSpentInSeconds int, billableSeconds int, start time.Time) Worklog {
 	return Worklog{
 		IssueKey:           issueKey,
 		Id:                 id,
 		TimeSpentInSeconds: timeSpentInSeconds,
-		HoursSpent:         hoursSpent,
+		BillableSeconds:    billableSeconds,
+		Start:              start,
 	}
 }
