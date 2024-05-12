@@ -48,3 +48,7 @@ func TempoDateToTime(tempoDate string, tempoTime string) (time.Time, error) {
 		fmt.Sprintf("%sT%sZ", tempoDate, tempoTime),
 	)
 }
+
+func TimeToTempoDate(t time.Time) string {
+	return t.Format("2006-01-02T15:04:05Z")
+}
