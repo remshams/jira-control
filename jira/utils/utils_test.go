@@ -52,7 +52,7 @@ func TestTimeToJiraDate_Valid(t *testing.T) {
 	location, _ := time.LoadLocation(time.Local.String())
 	input := time.Date(year, month, day, hour, minute, second, nanosecond, location)
 	expected := fmt.Sprintf(
-		"%04d-%02d-%02dT%02d:%02d:%02d.000+0100",
+		"%04d-%02d-%02dT%02d:%02d:%02d+0100",
 		year,
 		month,
 		day,
@@ -63,4 +63,26 @@ func TestTimeToJiraDate_Valid(t *testing.T) {
 	convertedString := TimeToJiraDate(input)
 
 	assert.Equal(t, expected, convertedString)
+}
+
+func TestTempoDateToTime(t *testing.T) {
+	year := 2024
+	month := time.May
+	day := 12
+	hour := 18
+	minutes := 12
+	seconds := 12
+	tempoDate := fmt.Sprintf("%04d-%02d-%02d", year, month, day)
+	tempoTime := fmt.Sprintf("%02d:%02d:%02d", hour, minutes, seconds)
+	expected := time.Date(year, month, day, hour, minutes, seconds, 0, time.UTC)
+
+	dateReturned, _ := TempoDateToTime(tempoDate, tempoTime)
+
+	assert.Equal(t, expected, dateReturned)
+}
+
+func TestTempoDateToTimeInvalidDate(t *testing.T) {
+	_, err := TempoDateToTime("2024-5-12", "18:12:12")
+
+	assert.NotNil(t, err)
 }

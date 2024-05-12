@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -39,4 +40,11 @@ func JiraDateToTime(timeString string) (time.Time, error) {
 
 func TimeToJiraDate(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05.999-0700")
+}
+
+func TempoDateToTime(tempoDate string, tempoTime string) (time.Time, error) {
+	return time.Parse(
+		"2006-01-02T15:04:05Z",
+		fmt.Sprintf("%sT%sZ", tempoDate, tempoTime),
+	)
 }
