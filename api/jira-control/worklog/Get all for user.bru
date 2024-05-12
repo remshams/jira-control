@@ -1,0 +1,20 @@
+meta {
+  name: Get all for user
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://api.tempo.io/4/worklogs?from=2024-05-01&to=2024-05-12
+  body: none
+  auth: bearer
+}
+
+query {
+  from: 2024-05-01
+  to: 2024-05-12
+}
+
+auth:bearer {
+  token: {{tempo-api-token}}
+}
