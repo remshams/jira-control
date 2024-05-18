@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
+	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
+	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
@@ -50,6 +53,32 @@ func loadWorklogs(adapter tui_jira.JiraAdapter, worklogsChan chan []jira.TempoWo
 	}
 }
 
+type WorklogListKeyMap struct {
+	global common.GlobalKeyMap
+	help   help.KeyMap
+	table  table.KeyMap
+}
+
+func (m WorklogListKeyMap) ShortHelp() []key.Binding {
+	shortHelp := []key.Binding{
+		m.help.Help,
+	}
+	return append(shortHelp, m.global.KeyBindings()...)
+}
+
+func (m WorklogListKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		m.ShortHelp(),
+		table.DefaultKeyBindings,
+	}
+}
+
+var WorklogListKeys = WorklogListKeyMap{
+	global: common.GlobalKeys,
+	help:   help.HelpKeys,
+	table:  table.DefaultKeyMap,
+}
+
 const (
 	tempoWorklogStateLoaded  utils.ViewState = "tempoWorklogStateLoaded"
 	tempoWorklogStateLoading utils.ViewState = "tempoWorklogStateLoading"
@@ -79,6 +108,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		title.CreateSetPageTitleMsg("Tempo worklog list"),
+		help.CreateSetKeyMapMsg(WorklogListKeys),
 		m.spinner.Tick(),
 		createInitAction,
 	)
