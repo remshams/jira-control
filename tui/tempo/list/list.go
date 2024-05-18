@@ -1,25 +1,23 @@
-package tempo_home
+package tempo_workloglist
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	title "github.com/remshams/common/tui/bubbles/page_title"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
-	tempo_workloglist "github.com/remshams/jira-control/tui/tempo/list"
 )
 
 type Model struct {
-	adapter     tui_jira.JiraAdapter
-	worklogList tempo_workloglist.Model
+	adapter tui_jira.JiraAdapter
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
-		adapter:     adapter,
-		worklogList: tempo_workloglist.New(adapter),
+		adapter: adapter,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	return m.worklogList.Init()
+	return title.CreateSetPageTitleMsg("Tempo worklog list")
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -28,5 +26,5 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.worklogList.View()
+	return "Tempo worklog list"
 }
