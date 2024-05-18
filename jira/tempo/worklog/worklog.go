@@ -9,9 +9,10 @@ type WorklogListQuery struct {
 }
 
 func NewWorklistQuery() WorklogListQuery {
+	now := time.Now()
 	return WorklogListQuery{
-		from: time.Now(),
-		to:   time.Now().Add(time.Duration(time.Hour * 24)),
+		from: time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
+		to:   time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
 	}
 }
 
