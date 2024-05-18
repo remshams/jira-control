@@ -5,6 +5,7 @@ import (
 	"github.com/remshams/jira-control/jira/favorite"
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
 	"github.com/remshams/jira-control/jira/utils"
 )
 
@@ -18,6 +19,8 @@ type IssueSearchRequest = issue.IssueSearchRequest
 type OrderBy = utils.OrderBy
 type Sorting = utils.Sorting
 type Favorite = favorite.Favorite
+type TempoWorklog = tempo_worklog.Worklog
+type TempoWorklogListQuery = tempo_worklog.WorklogListQuery
 type App = app.App
 
 const (
@@ -51,4 +54,8 @@ func NewFavorite(adapter favorite.FavoriteAdapter, issueKey string, hoursSpent f
 
 func PrepareApplication() (*app.App, error) {
 	return app.AppFromEnv()
+}
+
+func NewTempoWorklistQuery() tempo_worklog.WorklogListQuery {
+	return tempo_worklog.NewWorklistQuery()
 }

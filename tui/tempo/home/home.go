@@ -24,6 +24,7 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.worklogList, cmd = m.worklogList.Update(msg)
 	return m, cmd
 }
 
