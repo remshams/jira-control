@@ -19,6 +19,7 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	tui_last_updated "github.com/remshams/jira-control/tui/last-updated/home"
 	app_store "github.com/remshams/jira-control/tui/store"
+	tempo_home "github.com/remshams/jira-control/tui/tempo/home"
 	worklog_details "github.com/remshams/jira-control/tui/worklog/details"
 )
 
@@ -27,6 +28,7 @@ const (
 	stateWorklog     utils.ViewState = "worklog"
 	stateLastUpdated utils.ViewState = "last_updated"
 	stateFavorites   utils.ViewState = "favorites"
+	stateTempo       utils.ViewState = "tempo"
 )
 
 type Model struct {
@@ -37,6 +39,7 @@ type Model struct {
 	help        help.Model
 	issue       issue_home.Model
 	worklog     worklog_details.Model
+	tempo       tempo_home.Model
 	lastUpdated tui_last_updated.Model
 	favorites   favorite_home.Model
 	state       utils.ViewState
@@ -45,12 +48,13 @@ type Model struct {
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
 		tab: tabs.New(
-			[]string{"Worklog", "Issues", "Last Updated", "Favorites"},
+			[]string{"Worklog", "Issues", "Last Updated", "Favorites", "Tempo"},
 		),
 		title:       title.New(),
 		toast:       toast.New(),
 		help:        help.New(),
 		worklog:     worklog_details.New(adapter),
+		tempo:       tempo_home.New(adapter),
 		issue:       issue_home.New(adapter),
 		lastUpdated: tui_last_updated.New(adapter),
 		favorites:   favorite_home.New(adapter),
@@ -107,6 +111,9 @@ func (m *Model) processTab(msg tabs.TabSelectedMsg) tea.Cmd {
 	case 3:
 		cmd = m.favorites.Init()
 		m.state = stateFavorites
+	case 4:
+		cmd = m.tempo.Init()
+		m.state = stateTempo
 	}
 	return cmd
 }
@@ -122,6 +129,8 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 		cmd = m.processLastUpdatedUpdate(msg)
 	case stateFavorites:
 		cmd = m.processFavoritesUpdate(msg)
+	case stateTempo:
+		cmd = m.processTempoUpdate(msg)
 	}
 	return cmd
 }
@@ -156,6 +165,12 @@ func (m *Model) processFavoritesUpdate(msg tea.Msg) tea.Cmd {
 	default:
 		m.favorites, cmd = m.favorites.Update(msg)
 	}
+	return cmd
+}
+
+func (m *Model) processTempoUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	m.tempo, cmd = m.tempo.Update(msg)
 	return cmd
 }
 
@@ -200,6 +215,8 @@ func (m Model) renderContent() string {
 		return style.Render(m.lastUpdated.View())
 	case stateFavorites:
 		return style.Render(m.favorites.View())
+	case stateTempo:
+		return style.Render(m.tempo.View())
 	default:
 		return "View does not exist"
 	}
