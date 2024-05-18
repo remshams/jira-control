@@ -56,6 +56,6 @@ func PrepareApplication() (*app.App, error) {
 	return app.AppFromEnv()
 }
 
-func NewTempoWorklistQuery() tempo_worklog.WorklogListQuery {
-	return tempo_worklog.NewWorklistQuery()
+func NewTempoWorklistQuery(adapter tempo_worklog.WorklistAdapter) tempo_worklog.WorklogListQuery {
+	return tempo_worklog.NewWorklistQuery(adapter)
 }

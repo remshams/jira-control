@@ -3,16 +3,18 @@ package tempo_worklog
 import "time"
 
 type WorklogListQuery struct {
+	adapter        WorklistAdapter
 	from           time.Time
 	to             time.Time
 	sortDescending bool
 }
 
-func NewWorklistQuery() WorklogListQuery {
+func NewWorklistQuery(adapter WorklistAdapter) WorklogListQuery {
 	now := time.Now()
 	return WorklogListQuery{
-		from: time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
-		to:   time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
+		adapter: adapter,
+		from:    time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
+		to:      time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
 	}
 }
 
@@ -29,6 +31,10 @@ func (w WorklogListQuery) WithTo(to time.Time) WorklogListQuery {
 func (w WorklogListQuery) WithSortDescending(sortDescending bool) WorklogListQuery {
 	w.sortDescending = sortDescending
 	return w
+}
+
+func (w WorklogListQuery) Search() ([]Worklog, error) {
+	return w.adapter.List(w)
 }
 
 type WorklistAdapter interface {
