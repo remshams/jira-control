@@ -3,13 +3,13 @@ package tempo_worklog
 import "time"
 
 type WorklogListQuery struct {
-	adapter        WorklistAdapter
+	adapter        WorklogListAdapter
 	from           time.Time
 	to             time.Time
 	sortDescending bool
 }
 
-func NewWorklistQuery(adapter WorklistAdapter) WorklogListQuery {
+func NewWorkloglistQuery(adapter WorklogListAdapter) WorklogListQuery {
 	now := time.Now()
 	return WorklogListQuery{
 		adapter: adapter,
@@ -37,7 +37,7 @@ func (w WorklogListQuery) Search() ([]Worklog, error) {
 	return w.adapter.List(w)
 }
 
-type WorklistAdapter interface {
+type WorklogListAdapter interface {
 	List(query WorklogListQuery) ([]Worklog, error)
 }
 

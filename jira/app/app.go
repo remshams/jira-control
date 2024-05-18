@@ -23,7 +23,7 @@ type App struct {
 	IssueAdapter        issue.IssueAdapter
 	IssueWorklogAdapter issue_worklog.WorklogAdapter
 	FavoriteAdapter     favorite.FavoriteAdapter
-	TempoWorklogAdapter tempo_worklog.WorklistAdapter
+	TempoWorklogAdapter tempo_worklog.WorklogListAdapter
 }
 
 func AppFromEnv() (*App, error) {

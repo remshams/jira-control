@@ -16,7 +16,7 @@ func main() {
 		log.Errorf("Could not create JiraAdapter: %v", err)
 		os.Exit(1)
 	}
-	query := tempo_worklog.NewWorklistQuery(app.TempoWorklogAdapter)
+	query := tempo_worklog.NewWorkloglistQuery(app.TempoWorklogAdapter)
 	queries, err := app.TempoWorklogAdapter.List(query)
 	if err != nil {
 		log.Error("Could not load tempo worklogs")

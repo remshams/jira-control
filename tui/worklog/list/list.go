@@ -140,12 +140,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case worklogListStateLoading:
 		cmd = m.processLoadingUpdate(msg)
 	case worklogListStateLoaded:
-		cmd = m.processWorkListUpdate(msg)
+		cmd = m.processWorklogListUpdate(msg)
 	}
 	return m, cmd
 }
 
-func (m *Model) processWorkListUpdate(msg tea.Msg) tea.Cmd {
+func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
