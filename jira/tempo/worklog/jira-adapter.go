@@ -3,13 +3,14 @@ package tempo_worklog
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
 	"github.com/remshams/jira-control/jira/utils"
 )
 
-const worklogPath = "api.tempo.io/4/worklogs"
+const worklogPath = "/4/worklogs"
 
 type worklogResponseMetadataDto struct {
 	Count  int `json:"count"`
@@ -65,11 +66,13 @@ func fromJson(jsonBytes []byte) (worklogResponseDto, error) {
 }
 
 type JiraWorklogAdapter struct {
+	url      url.URL
 	apiToken string
 }
 
-func NewJiraWorklogAdapter(url string, apiToken string) JiraWorklogAdapter {
+func NewJiraWorklogAdapter(url url.URL, apiToken string) JiraWorklogAdapter {
 	return JiraWorklogAdapter{
+		url:      url,
 		apiToken: apiToken,
 	}
 }
@@ -90,7 +93,7 @@ func (w JiraWorklogAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 	log.Debugf("WorklogJiraAdapter: Query params: %v", queryParams)
 	_, worklogResponseBytes, err := utils_http.PerformRequest(
 		"Tempo Worklog List",
-		worklogPath,
+		w.url.JoinPath(worklogPath).String(),
 		http.MethodGet,
 		headers,
 		queryParams,
@@ -98,6 +101,7 @@ func (w JiraWorklogAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 		nil,
 	)
 	if err != nil {
+		log.Errorf("WorklogJiraAdapter: Worklog request failed: %v", err)
 		return []Worklog{}, err
 	}
 	worklogResponseDto, err := fromJson(worklogResponseBytes)
