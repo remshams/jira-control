@@ -24,7 +24,7 @@ type worklogIssueDto struct {
 
 type worklogDto struct {
 	TempoWorklogId   int             `json:"tempoWorklogId"`
-	Issue            worklogIssueDto `json:"worklogIssueDto"`
+	Issue            worklogIssueDto `json:"issue"`
 	TimeSpentSeconds int             `json:"timeSpentSeconds"`
 	BillableSeconds  int             `json:"billableSeconds"`
 	StartDate        string          `json:"startDate"`
