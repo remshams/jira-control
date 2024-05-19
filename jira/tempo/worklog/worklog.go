@@ -1,6 +1,9 @@
 package tempo_worklog
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type WorklogListQuery struct {
 	adapter        WorklogListAdapter
@@ -12,9 +15,10 @@ type WorklogListQuery struct {
 func NewWorkloglistQuery(adapter WorklogListAdapter) WorklogListQuery {
 	now := time.Now()
 	return WorklogListQuery{
-		adapter: adapter,
-		from:    time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
-		to:      time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
+		adapter:        adapter,
+		from:           time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
+		to:             time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
+		sortDescending: false,
 	}
 }
 
@@ -28,13 +32,26 @@ func (w WorklogListQuery) WithTo(to time.Time) WorklogListQuery {
 	return w
 }
 
-func (w WorklogListQuery) WithSortDescending(sortDescending bool) WorklogListQuery {
-	w.sortDescending = sortDescending
+func (w WorklogListQuery) WithSortDescending() WorklogListQuery {
+	w.sortDescending = true
 	return w
 }
 
 func (w WorklogListQuery) Search() ([]Worklog, error) {
-	return w.adapter.List(w)
+	worklogs, err := w.adapter.List(w)
+	if err != nil {
+		return []Worklog{}, err
+	}
+	if w.sortDescending {
+		slices.SortFunc(worklogs, func(base, compare Worklog) int {
+			if base.Start.After(compare.Start) {
+				return -1
+			} else {
+				return 1
+			}
+		})
+	}
+	return worklogs, nil
 }
 
 type WorklogListAdapter interface {
