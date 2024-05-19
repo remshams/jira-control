@@ -23,14 +23,14 @@ type worklogIssueDto struct {
 }
 
 type worklogDto struct {
-	TempoWorklogId     int             `json:"tempoWorklogId"`
-	Issue              worklogIssueDto `json:"worklogIssueDto"`
-	TimeSpentInSeconds int             `json:"timeSpentInSeconds"`
-	BillableSeconds    int             `json:"billableSeconds"`
-	StartDate          string          `json:"startDate"`
-	StartTime          string          `json:"startTime"`
-	CreatedAt          string          `json:"createdAt"`
-	UpdatedAt          string          `json:"updatedAt"`
+	TempoWorklogId   int             `json:"tempoWorklogId"`
+	Issue            worklogIssueDto `json:"worklogIssueDto"`
+	TimeSpentSeconds int             `json:"timeSpentSeconds"`
+	BillableSeconds  int             `json:"billableSeconds"`
+	StartDate        string          `json:"startDate"`
+	StartTime        string          `json:"startTime"`
+	CreatedAt        string          `json:"createdAt"`
+	UpdatedAt        string          `json:"updatedAt"`
 }
 
 func (w worklogDto) toWorklog() (*Worklog, error) {
@@ -38,7 +38,7 @@ func (w worklogDto) toWorklog() (*Worklog, error) {
 	if err != nil {
 		return nil, err
 	}
-	worklog := NewWorklog(w.Issue.Id, w.TempoWorklogId, w.TimeSpentInSeconds, w.BillableSeconds, start)
+	worklog := NewWorklog(w.Issue.Id, w.TempoWorklogId, w.TimeSpentSeconds, w.BillableSeconds, start)
 	return &worklog, nil
 }
 

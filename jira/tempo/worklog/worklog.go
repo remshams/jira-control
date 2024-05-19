@@ -59,19 +59,19 @@ type WorklogListAdapter interface {
 }
 
 type Worklog struct {
-	IssueKey           int
-	Id                 int
-	TimeSpentInSeconds int
-	BillableSeconds    int
-	Start              time.Time
+	IssueKey         int
+	Id               int
+	TimeSpentSeconds int
+	BillableSeconds  int
+	Start            time.Time
 }
 
-func NewWorklog(issueKey int, id int, timeSpentInSeconds int, billableSeconds int, start time.Time) Worklog {
+func NewWorklog(issueKey int, id int, timeSpentSeconds int, billableSeconds int, start time.Time) Worklog {
 	return Worklog{
-		IssueKey:           issueKey,
-		Id:                 id,
-		TimeSpentInSeconds: timeSpentInSeconds,
-		BillableSeconds:    billableSeconds,
-		Start:              start,
+		IssueKey:         issueKey,
+		Id:               id,
+		TimeSpentSeconds: timeSpentSeconds,
+		BillableSeconds:  billableSeconds,
+		Start:            start,
 	}
 }

@@ -181,7 +181,7 @@ func createTableRows(worklogs []jira.TempoWorklog) []table.Row {
 		rows = append(rows, table.Row{
 			strconv.Itoa(worklog.Id),
 			worklog.Start.Format("2006-01-02 15:04"),
-			fmt.Sprintf("%.1f h", float64(worklog.TimeSpentInSeconds)/3600),
+			fmt.Sprintf("%.1f h", float64(worklog.TimeSpentSeconds)/3600),
 			"",
 		})
 	}
