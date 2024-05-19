@@ -176,13 +176,17 @@ func createTableColumns(tableWidth int) []table.Column {
 func createTableRows(worklogs []jira.TempoWorklog) []table.Row {
 	rows := []table.Row{}
 
-	log.Debugf("Worklogs: %v", len(worklogs))
+	log.Debugf("Worklogs: %d", len(worklogs))
 	for _, worklog := range worklogs {
+		description := worklog.Description
+		if description == "" {
+			description = "No worklog comment"
+		}
 		rows = append(rows, table.Row{
 			strconv.Itoa(worklog.Id),
 			worklog.Start.Format("2006-01-02 15:04"),
 			fmt.Sprintf("%.1f h", float64(worklog.TimeSpentSeconds)/3600),
-			"",
+			description,
 		})
 	}
 	return rows
