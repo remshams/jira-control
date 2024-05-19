@@ -31,6 +31,7 @@ type worklogDto struct {
 	StartTime        string          `json:"startTime"`
 	CreatedAt        string          `json:"createdAt"`
 	UpdatedAt        string          `json:"updatedAt"`
+	Description      string          `json:"description"`
 }
 
 func (w worklogDto) toWorklog() (*Worklog, error) {
@@ -38,7 +39,14 @@ func (w worklogDto) toWorklog() (*Worklog, error) {
 	if err != nil {
 		return nil, err
 	}
-	worklog := NewWorklog(w.Issue.Id, w.TempoWorklogId, w.TimeSpentSeconds, w.BillableSeconds, start)
+	worklog := NewWorklog(
+		w.Issue.Id,
+		w.TempoWorklogId,
+		w.TimeSpentSeconds,
+		w.BillableSeconds,
+		start,
+		w.Description,
+	)
 	return &worklog, nil
 }
 

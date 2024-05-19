@@ -64,14 +64,16 @@ type Worklog struct {
 	TimeSpentSeconds int
 	BillableSeconds  int
 	Start            time.Time
+	Description      string
 }
 
-func NewWorklog(issueKey int, id int, timeSpentSeconds int, billableSeconds int, start time.Time) Worklog {
+func NewWorklog(issueKey int, id int, timeSpentSeconds int, billableSeconds int, start time.Time, description string) Worklog {
 	return Worklog{
 		IssueKey:         issueKey,
 		Id:               id,
 		TimeSpentSeconds: timeSpentSeconds,
 		BillableSeconds:  billableSeconds,
 		Start:            start,
+		Description:      description,
 	}
 }
