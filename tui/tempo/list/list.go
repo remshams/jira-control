@@ -45,7 +45,9 @@ func createLoadWorklogsAction(adapter tui_jira.JiraAdapter) tea.Cmd {
 }
 
 func loadWorklogs(adapter tui_jira.JiraAdapter, worklogsChan chan []jira.TempoWorklog, errorChan chan error) {
-	worklogs, err := jira.NewTempoWorklogListQuery(adapter.App.TempoWorklogAdapter).Search()
+	worklogs, err := jira.NewTempoWorklogListQuery(adapter.App.TempoWorklogAdapter).
+		WithSortDescending().
+		Search()
 	if err != nil {
 		errorChan <- err
 	} else {
