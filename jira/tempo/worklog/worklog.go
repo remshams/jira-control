@@ -56,6 +56,7 @@ func (w WorklogListQuery) Search() ([]Worklog, error) {
 
 type WorklogListAdapter interface {
 	List(query WorklogListQuery) ([]Worklog, error)
+	Delete(id int) error
 }
 
 type Worklog struct {

@@ -2,6 +2,7 @@ package tempo_worklog
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 
@@ -122,4 +123,8 @@ func (w JiraWorklogAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 		log.Error("Could not parse worklogs: %v", worklogs)
 	}
 	return worklogs, nil
+}
+
+func (w JiraWorklogAdapter) Delete(id int) error {
+	return errors.New("Not implemented")
 }
