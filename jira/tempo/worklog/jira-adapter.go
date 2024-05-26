@@ -2,7 +2,7 @@ package tempo_worklog
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -126,5 +126,18 @@ func (w JiraWorklogAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 }
 
 func (w JiraWorklogAdapter) Delete(id int) error {
-	return errors.New("Not implemented")
+	headers := []utils_http.HttpHeader{utils_http.CreateBearerTokenHeader(w.apiToken)}
+	_, _, err := utils_http.PerformRequest(
+		"Tepmp Worklog List",
+		w.url.JoinPath(fmt.Sprintf("%s/%d", worklogPath, id)).String(),
+		http.MethodDelete,
+		headers,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		log.Error("Could not perform delete request")
+	}
+	return nil
 }
