@@ -172,11 +172,11 @@ func (m Model) View() string {
 }
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
-		{Title: "Id", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 20)},
-		{Title: "Issue Id", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 20)},
-		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(40, tableWidth, 20)},
+		{Title: "Id", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Issue Id", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Start", Width: styles.CalculateDimensionsFromPercentage(20, tableWidth, 40)},
 		{Title: "Time Spent", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
-		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(30, tableWidth, styles.UnlimitedDimension)},
+		{Title: "Description", Width: styles.CalculateDimensionsFromPercentage(60, tableWidth, styles.UnlimitedDimension)},
 	}
 }
 
@@ -192,7 +192,7 @@ func createTableRows(worklogs []jira.TempoWorklog) []table.Row {
 		rows = append(rows, table.Row{
 			strconv.Itoa(worklog.Id),
 			strconv.Itoa(worklog.IssueKey),
-			worklog.Start.Format("2006-01-02 15:04"),
+			worklog.Start.Format("2006-01-02 15:04 (Mon)"),
 			fmt.Sprintf("%.1f h", float64(worklog.TimeSpentSeconds)/3600),
 			description,
 		})
