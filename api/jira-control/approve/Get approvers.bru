@@ -1,0 +1,15 @@
+meta {
+  name: Get approvers
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://api.tempo.io/4/timesheet-approvals/user/{{accountId}}/reviewers
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tempo-api-token}}
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Get myself
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://{{url}}/rest/api/3/myself
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
