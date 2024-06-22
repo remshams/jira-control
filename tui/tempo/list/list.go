@@ -148,7 +148,13 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.table, cmd = m.table.Update(msg)
+	switch msg := msg.(type) {
+	case initAction:
+		m.state = tempoWorklogStateLoading
+		cmd = createLoadWorklogsAction(m.adapter)
+	default:
+		m.table, cmd = m.table.Update(msg)
+	}
 	return cmd
 }
 
