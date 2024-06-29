@@ -11,6 +11,7 @@ import (
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
+	"github.com/remshams/jira-control/jira/user"
 )
 
 type App struct {
@@ -24,6 +25,7 @@ type App struct {
 	IssueWorklogAdapter issue_worklog.WorklogAdapter
 	FavoriteAdapter     favorite.FavoriteAdapter
 	TempoWorklogAdapter tempo_worklog.WorklogListAdapter
+	UserAdapter         user.UserAdapter
 }
 
 func AppFromEnv() (*App, error) {
@@ -75,10 +77,12 @@ func (app *App) addAdapers() {
 		app.IssueAdapter = issue.NewJiraIssueAdapter(app.IssueWorklogAdapter, app.Url, app.Username, app.ApiToken)
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 		app.TempoWorklogAdapter = tempo_worklog.NewJiraWorklogAdapter(app.TempoUrl, app.TempoApiToken)
+		app.UserAdapter = user.NewJiraUserAdapter(app.Url, app.Username, app.ApiToken)
 	} else {
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
 		app.IssueAdapter = issue.NewMockIssueAdapter(app.IssueWorklogAdapter)
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 		app.TempoWorklogAdapter = tempo_worklog.NewMockWorklogAdapter()
+		app.UserAdapter = user.NewMockUserAdapter()
 	}
 }

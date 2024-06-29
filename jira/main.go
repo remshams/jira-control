@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
 	jira "github.com/remshams/jira-control/jira/public"
-	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
 )
 
 func main() {
@@ -16,11 +15,10 @@ func main() {
 		log.Errorf("Could not create JiraAdapter: %v", err)
 		os.Exit(1)
 	}
-	query := tempo_worklog.NewWorkloglistQuery(app.TempoWorklogAdapter)
-	queries, err := app.TempoWorklogAdapter.List(query)
+	user, err := app.UserAdapter.Myself()
 	if err != nil {
-		log.Error("Could not load tempo worklogs")
+		log.Error("Could not load myself")
 		os.Exit(1)
 	}
-	log.Debugf("Number of worklogs: %d", len(queries))
+	log.Debugf("User: %s %s", user.AccountId, user.Name)
 }
