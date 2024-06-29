@@ -1,0 +1,20 @@
+meta {
+  name: Get user
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://{{url}}/rest/api/3/user?accountId=61c334fb125b1200713451a0
+  body: none
+  auth: basic
+}
+
+params:query {
+  accountId: 61c334fb125b1200713451a0
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{token}}
+}
