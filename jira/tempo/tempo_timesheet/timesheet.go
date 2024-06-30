@@ -1,4 +1,4 @@
-package timesheet
+package tempo_timesheet
 
 import "github.com/remshams/jira-control/jira/user"
 
