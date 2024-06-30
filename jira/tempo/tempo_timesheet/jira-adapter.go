@@ -77,3 +77,7 @@ func (jiraTimesheetAdapter JiraTimesheetAdapter) Reviewers(accountId string) ([]
 	}
 	return reviewers, nil
 }
+
+func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string) (string, error) {
+	return "", nil
+}
