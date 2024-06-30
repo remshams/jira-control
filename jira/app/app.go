@@ -10,22 +10,24 @@ import (
 	"github.com/remshams/jira-control/jira/favorite"
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+	"github.com/remshams/jira-control/jira/tempo/timesheet"
 	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
 	"github.com/remshams/jira-control/jira/user"
 )
 
 type App struct {
-	Production          bool
-	Url                 url.URL
-	TempoUrl            url.URL
-	Username            string
-	ApiToken            string
-	TempoApiToken       string
-	IssueAdapter        issue.IssueAdapter
-	IssueWorklogAdapter issue_worklog.WorklogAdapter
-	FavoriteAdapter     favorite.FavoriteAdapter
-	TempoWorklogAdapter tempo_worklog.WorklogListAdapter
-	UserAdapter         user.UserAdapter
+	Production            bool
+	Url                   url.URL
+	TempoUrl              url.URL
+	Username              string
+	ApiToken              string
+	TempoApiToken         string
+	IssueAdapter          issue.IssueAdapter
+	IssueWorklogAdapter   issue_worklog.WorklogAdapter
+	FavoriteAdapter       favorite.FavoriteAdapter
+	TempoWorklogAdapter   tempo_worklog.WorklogListAdapter
+	UserAdapter           user.UserAdapter
+	TempoTimesheetAdapter timesheet.TimesheetAdapter
 }
 
 func AppFromEnv() (*App, error) {
@@ -78,11 +80,13 @@ func (app *App) addAdapers() {
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 		app.TempoWorklogAdapter = tempo_worklog.NewJiraWorklogAdapter(app.TempoUrl, app.TempoApiToken)
 		app.UserAdapter = user.NewJiraUserAdapter(app.Url, app.Username, app.ApiToken)
+		app.TempoTimesheetAdapter = timesheet.NewJiraTimesheetAdapter(app.TempoUrl, app.TempoApiToken, app.UserAdapter)
 	} else {
 		app.IssueWorklogAdapter = issue_worklog.NewWorklogMockAdapter()
 		app.IssueAdapter = issue.NewMockIssueAdapter(app.IssueWorklogAdapter)
 		app.FavoriteAdapter = favorite.NewFavoriteJsonAdapter("favorites.json")
 		app.TempoWorklogAdapter = tempo_worklog.NewMockWorklogAdapter()
 		app.UserAdapter = user.NewMockUserAdapter()
+		app.TempoTimesheetAdapter = timesheet.NewMockTimesheetAdapter()
 	}
 }

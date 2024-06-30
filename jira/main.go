@@ -25,4 +25,6 @@ func main() {
 	log.Debugf("User: %s %s", user.AccountId, user.Name)
 	users, err := app.UserAdapter.Users([]string{user.AccountId})
 	log.Debugf("Users: %v", users)
+	reviewers, err := app.TempoTimesheetAdapter.Reviewers(user.AccountId)
+	log.Debugf("Reviewers: %v", reviewers)
 }
