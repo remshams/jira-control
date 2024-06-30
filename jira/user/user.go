@@ -2,6 +2,7 @@ package user
 
 type UserAdapter interface {
 	Myself() (User, error)
+	User(accountId string) (User, error)
 }
 
 type User struct {

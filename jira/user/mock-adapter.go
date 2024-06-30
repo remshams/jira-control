@@ -1,5 +1,11 @@
 package user
 
+import (
+	"fmt"
+
+	"github.com/charmbracelet/log"
+)
+
 type MockUserAdapter struct {
 }
 
@@ -8,5 +14,11 @@ func NewMockUserAdapter() MockUserAdapter {
 }
 
 func (_ MockUserAdapter) Myself() (User, error) {
+	log.Debug("MockUserAdapter: Request myself")
 	return NewUser("1", "mock user", "mock.user@mock.com"), nil
+}
+
+func (_ MockUserAdapter) User(accountId string) (User, error) {
+	log.Debugf("MockUserAdapter: Requesting user with accountId: %s", accountId)
+	return NewUser("2", fmt.Sprintf("User with accountId: %s", accountId), fmt.Sprintf("mock.%s@mock.com", accountId)), nil
 }

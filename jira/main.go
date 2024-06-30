@@ -21,4 +21,6 @@ func main() {
 		os.Exit(1)
 	}
 	log.Debugf("User: %s %s", user.AccountId, user.Name)
+	user, err = app.UserAdapter.User(user.AccountId)
+	log.Debugf("User: %s %s", user.AccountId, user.Name)
 }
