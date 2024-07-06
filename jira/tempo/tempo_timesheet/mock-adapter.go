@@ -20,6 +20,17 @@ func (_ MockTimesheetAdapter) Reviewers(accountId string) ([]user.User, error) {
 }
 
 func (_ MockTimesheetAdapter) Status(accountId string, from time.Time, to time.Time) (TimesheetStatus, error) {
-	log.Debugf("MockTimesheetAdapter) Request status for account: %s, from: %v, to %v", accountId, from, to)
+	log.Debugf("MockTimesheetAdapter: Request status for account: %s, from: %v, to %v", accountId, from, to)
 	return NewTimesheetStatus("OPEN", 120, 120), nil
+}
+
+func (_ MockTimesheetAdapter) Submit(accountId string, reviewerAccountId string, from time.Time, to time.Time) error {
+	log.Debugf(
+		"MockTimesheetAdapter: Submit timesheet for accountId: %s with reviewerId: %s from %v to %v",
+		accountId,
+		reviewerAccountId,
+		from,
+		to,
+	)
+	return nil
 }

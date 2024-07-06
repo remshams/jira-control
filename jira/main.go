@@ -31,5 +31,4 @@ func main() {
 	log.Debugf("Reviewers: %v", reviewers)
 	status, err := timesheet.Status()
 	log.Debugf("Status: %v", status)
-
 }

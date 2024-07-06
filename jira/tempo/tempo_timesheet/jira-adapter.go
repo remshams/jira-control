@@ -15,6 +15,7 @@ import (
 
 const reviewersPath = "/4/timesheet-approvals/user/%s/reviewers"
 const statusPath = "/4/timesheet-approvals/user/%s"
+const submitPath = "/4/timesheet-approvals/user/%s/submit"
 
 type reviewerDto struct {
 	AccountId string `json:"accountId"`
@@ -58,6 +59,20 @@ func timesheetStatusFromJson(body []byte) (timesheetStatusDto, error) {
 		return timesheetStatusDto, err
 	}
 	return timesheetStatusDto, nil
+}
+
+type submitTimesheetDto struct {
+	ReviewerAccountId string `json:"reviewerAccountId"`
+}
+
+func NewSubmitTimesheetDto(reviewerAccountId string) submitTimesheetDto {
+	return submitTimesheetDto{
+		ReviewerAccountId: reviewerAccountId,
+	}
+}
+
+func (submitTimesheetDto submitTimesheetDto) toJson() ([]byte, error) {
+	return json.Marshal(submitTimesheetDto)
 }
 
 type JiraTimesheetAdapter struct {
@@ -139,4 +154,48 @@ func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string, from t
 		return TimesheetStatus{}, err
 	}
 	return timesheetDto.toTimeSheetStatus(), nil
+}
+
+func (jiraTimesheetAdapter JiraTimesheetAdapter) Submit(
+	accountId string,
+	reviewerAccountId string,
+	from time.Time,
+	to time.Time,
+) error {
+	log.Debugf("JiraTimesheetAdapter: Submit timesheet for accountId %s and reviewerId %s from %v to %v",
+		accountId,
+		reviewerAccountId,
+		from,
+		to,
+	)
+	path := jiraTimesheetAdapter.url.JoinPath(fmt.Sprintf(submitPath, accountId))
+	body, err := NewSubmitTimesheetDto(reviewerAccountId).toJson()
+	params := []utils_http.QueryParam{
+		{
+			Key:   "from",
+			Value: from.Format("2006-01-02"),
+		},
+		{
+			Key:   "to",
+			Value: to.Format("2006-01-02"),
+		},
+	}
+	if err != nil {
+		log.Debugf("Could not marshal request body %v", err)
+		return err
+	}
+	_, _, err = utils_http.PerformRequest(
+		"JiraTimesheetAdapter",
+		path.String(),
+		http.MethodPost,
+		jira_common_http.CreateDefaultTempoHttpHeaders(jiraTimesheetAdapter.apiToken),
+		params,
+		body,
+		nil,
+	)
+	if err != nil {
+		log.Errorf("JiraTimesheetAdapter: Could not perform request %v", err)
+		return err
+	}
+	return nil
 }

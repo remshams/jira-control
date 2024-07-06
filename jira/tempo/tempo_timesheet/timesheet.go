@@ -24,6 +24,7 @@ func NewTimesheetStatus(status string, requiredHours int, spentHours int) Timesh
 type TimesheetAdapter interface {
 	Reviewers(accountId string) ([]user.User, error)
 	Status(accountId string, from time.Time, to time.Time) (TimesheetStatus, error)
+	Submit(accountId string, reviewerAccountId string, from time.Time, to time.Time) error
 }
 
 type Timesheet struct {
@@ -45,4 +46,9 @@ func (timesheet Timesheet) Reviewers() ([]user.User, error) {
 func (timesheet Timesheet) Status() (TimesheetStatus, error) {
 	startOfMonth, endOfMonth := utils_time.GetStartAndEndOfMonth(time.Now())
 	return timesheet.adapter.Status(timesheet.AccountId, startOfMonth, endOfMonth)
+}
+
+func (timesheet Timesheet) Submit(reviewerAccountId string) error {
+	startOfMonth, endOfMonth := utils_time.GetStartAndEndOfMonth(time.Now())
+	return timesheet.adapter.Submit(timesheet.AccountId, reviewerAccountId, startOfMonth, endOfMonth)
 }
