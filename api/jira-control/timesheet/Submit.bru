@@ -5,9 +5,14 @@ meta {
 }
 
 post {
-  url: https://api.tempo.io/4/timesheet-approvals/user/{{accountId}}/submit
+  url: https://api.tempo.io/4/timesheet-approvals/user/{{accountId}}/submit?from=2024-06-01&to=2024-06-15
   body: json
   auth: bearer
+}
+
+params:query {
+  from: 2024-06-01
+  to: 2024-06-15
 }
 
 auth:bearer {
@@ -16,6 +21,6 @@ auth:bearer {
 
 body:json {
   {
-    "reviewerAccountId": {{reviewerAccountId}}
+    "reviewerAccountId": "{{reviewerAccountId}}"
   }
 }
