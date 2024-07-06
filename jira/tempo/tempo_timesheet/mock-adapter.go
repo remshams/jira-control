@@ -2,6 +2,7 @@ package tempo_timesheet
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/remshams/jira-control/jira/user"
@@ -18,7 +19,7 @@ func (_ MockTimesheetAdapter) Reviewers(accountId string) ([]user.User, error) {
 	return []user.User{user.NewUser("0", "mock user", fmt.Sprintf("mock.%s@mock.com", accountId))}, nil
 }
 
-func (_ MockTimesheetAdapter) Status(accountId string) (TimesheetStatus, error) {
-	log.Debugf("MockTimesheetAdapter) Request status for account: %s", accountId)
+func (_ MockTimesheetAdapter) Status(accountId string, from time.Time, to time.Time) (TimesheetStatus, error) {
+	log.Debugf("MockTimesheetAdapter) Request status for account: %s, from: %v, to %v", accountId, from, to)
 	return NewTimesheetStatus("OPEN", 120, 120), nil
 }

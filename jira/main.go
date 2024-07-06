@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/utils/logger"
 	jira "github.com/remshams/jira-control/jira/public"
+	"github.com/remshams/jira-control/jira/tempo/tempo_timesheet"
 )
 
 func main() {
@@ -25,6 +26,10 @@ func main() {
 	log.Debugf("User: %s %s", user.AccountId, user.Name)
 	users, err := app.UserAdapter.Users([]string{user.AccountId})
 	log.Debugf("Users: %v", users)
-	reviewers, err := app.TempoTimesheetAdapter.Reviewers(user.AccountId)
+	timesheet := tempo_timesheet.NewTimesheet(app.TempoTimesheetAdapter, users[0].AccountId)
+	reviewers, err := timesheet.Reviewers()
 	log.Debugf("Reviewers: %v", reviewers)
+	status, err := timesheet.Status()
+	log.Debugf("Status: %v", status)
+
 }

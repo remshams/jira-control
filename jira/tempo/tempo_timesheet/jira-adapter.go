@@ -2,10 +2,10 @@ package tempo_timesheet
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/charmbracelet/log"
 	utils_http "github.com/remshams/common/utils/http"
@@ -14,6 +14,7 @@ import (
 )
 
 const reviewersPath = "/4/timesheet-approvals/user/%s/reviewers"
+const statusPath = "/4/timesheet-approvals/user/%s"
 
 type reviewerDto struct {
 	AccountId string `json:"accountId"`
@@ -30,6 +31,33 @@ func reviewersFromJson(body []byte) ([]reviewerDto, error) {
 		return nil, err
 	}
 	return reviewersDto.Results, nil
+}
+
+type statusDto struct {
+	Key string `json:"key"`
+}
+
+type timesheetStatusDto struct {
+	RequiredSeconds  int       `json:"requiredSeconds"`
+	TimeSpentSeconds int       `json:"timeSpentSeconds"`
+	Status           statusDto `json:"status"`
+}
+
+func (timesheetStatusDto timesheetStatusDto) toTimeSheetStatus() TimesheetStatus {
+	return NewTimesheetStatus(
+		timesheetStatusDto.Status.Key,
+		timesheetStatusDto.RequiredSeconds/3600,
+		timesheetStatusDto.TimeSpentSeconds/3600,
+	)
+}
+
+func timesheetStatusFromJson(body []byte) (timesheetStatusDto, error) {
+	var timesheetStatusDto timesheetStatusDto
+	err := json.Unmarshal(body, &timesheetStatusDto)
+	if err != nil {
+		return timesheetStatusDto, err
+	}
+	return timesheetStatusDto, nil
 }
 
 type JiraTimesheetAdapter struct {
@@ -79,6 +107,36 @@ func (jiraTimesheetAdapter JiraTimesheetAdapter) Reviewers(accountId string) ([]
 	return reviewers, nil
 }
 
-func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string) (TimesheetStatus, error) {
-	return TimesheetStatus{}, errors.New("Not implemented")
+func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string, from time.Time, to time.Time) (TimesheetStatus, error) {
+	log.Debugf("JiraTimesheetAdapter: Request timesheet status for accountId: %s from %v to %v", accountId, from, to)
+	path := jiraTimesheetAdapter.url.JoinPath(fmt.Sprintf(statusPath, accountId))
+	params := []utils_http.QueryParam{
+		{
+			Key:   "from",
+			Value: from.Format("2006-01-02"),
+		},
+		{
+			Key:   "to",
+			Value: to.Format("2006-01-02"),
+		},
+	}
+	_, body, err := utils_http.PerformRequest(
+		"JiraTimesheetAdapter",
+		path.String(),
+		http.MethodGet,
+		jira_common_http.CreateDefaultTempoHttpHeaders(jiraTimesheetAdapter.apiToken),
+		params,
+		nil,
+		nil,
+	)
+	if err != nil {
+		log.Errorf("JiraTimesheetAdapter: Could not perform request %v", err)
+		return TimesheetStatus{}, err
+	}
+	timesheetDto, err := timesheetStatusFromJson(body)
+	if err != nil {
+		log.Errorf("JiraTimesheetAdapter: Could not parse timesheet status: %v", err)
+		return TimesheetStatus{}, err
+	}
+	return timesheetDto.toTimeSheetStatus(), nil
 }
