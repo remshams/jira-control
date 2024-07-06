@@ -2,6 +2,7 @@ package tempo_timesheet
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -78,6 +79,6 @@ func (jiraTimesheetAdapter JiraTimesheetAdapter) Reviewers(accountId string) ([]
 	return reviewers, nil
 }
 
-func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string) (string, error) {
-	return "", nil
+func (jiraTimesheetAdapter JiraTimesheetAdapter) Status(accountId string) (TimesheetStatus, error) {
+	return TimesheetStatus{}, errors.New("Not implemented")
 }

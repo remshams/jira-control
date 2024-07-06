@@ -18,7 +18,7 @@ func (_ MockTimesheetAdapter) Reviewers(accountId string) ([]user.User, error) {
 	return []user.User{user.NewUser("0", "mock user", fmt.Sprintf("mock.%s@mock.com", accountId))}, nil
 }
 
-func (_ MockTimesheetAdapter) Status(accountId string) (string, error) {
+func (_ MockTimesheetAdapter) Status(accountId string) (TimesheetStatus, error) {
 	log.Debugf("MockTimesheetAdapter) Request status for account: %s", accountId)
-	return "OPEN", nil
+	return NewTimesheetStatus("OPEN", 120, 120), nil
 }
