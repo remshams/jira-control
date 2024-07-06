@@ -7,13 +7,15 @@ type UserAdapter interface {
 }
 
 type User struct {
+	adapter   UserAdapter
 	AccountId string
 	Name      string
 	Email     string
 }
 
-func NewUser(accountId string, name string, email string) User {
+func NewUser(adapter UserAdapter, accountId string, name string, email string) User {
 	return User{
+		adapter:   adapter,
 		AccountId: accountId,
 		Name:      name,
 		Email:     email,

@@ -8,15 +8,17 @@ import (
 	"github.com/remshams/jira-control/jira/user"
 )
 
-type MockTimesheetAdapter struct{}
+type MockTimesheetAdapter struct {
+	userAdapter user.UserAdapter
+}
 
 func NewMockTimesheetAdapter() MockTimesheetAdapter {
 	return MockTimesheetAdapter{}
 }
 
-func (_ MockTimesheetAdapter) Reviewers(accountId string) ([]user.User, error) {
+func (adapter MockTimesheetAdapter) Reviewers(accountId string) ([]user.User, error) {
 	log.Debugf("MockTimesheetAdapter: Request approvers for: %s", accountId)
-	return []user.User{user.NewUser("0", "mock user", fmt.Sprintf("mock.%s@mock.com", accountId))}, nil
+	return []user.User{user.NewUser(adapter.userAdapter, "0", "mock user", fmt.Sprintf("mock.%s@mock.com", accountId))}, nil
 }
 
 func (_ MockTimesheetAdapter) Status(accountId string, from time.Time, to time.Time) (TimesheetStatus, error) {

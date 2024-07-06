@@ -26,17 +26,17 @@ type userDto struct {
 	Name      string `json:"displayName"`
 }
 
-func (userDto userDto) toUser() User {
-	return NewUser(userDto.AccountId, userDto.Name, userDto.Email)
+func (userDto userDto) toUser(adapter UserAdapter) User {
+	return NewUser(adapter, userDto.AccountId, userDto.Name, userDto.Email)
 }
 
-func userFromJson(body []byte) (User, error) {
+func userFromJson(adapter UserAdapter, body []byte) (User, error) {
 	var userDto userDto
 	err := json.Unmarshal(body, &userDto)
 	if err != nil {
 		return User{}, err
 	}
-	return userDto.toUser(), nil
+	return userDto.toUser(adapter), nil
 
 }
 
@@ -44,21 +44,21 @@ type usersDto struct {
 	Values []userDto `json:"values"`
 }
 
-func (usersDto usersDto) toUsers() []User {
+func (usersDto usersDto) toUsers(adapter UserAdapter) []User {
 	users := []User{}
 	for _, userDto := range usersDto.Values {
-		users = append(users, userDto.toUser())
+		users = append(users, userDto.toUser(adapter))
 	}
 	return users
 }
 
-func usersFromJson(body []byte) ([]User, error) {
+func usersFromJson(adapter UserAdapter, body []byte) ([]User, error) {
 	var usersDto usersDto
 	err := json.Unmarshal(body, &usersDto)
 	if err != nil {
 		return nil, err
 	}
-	return usersDto.toUsers(), nil
+	return usersDto.toUsers(adapter), nil
 }
 
 type JiraUserAdapter struct {
@@ -91,7 +91,7 @@ func (jiraUserAdapter JiraUserAdapter) Myself() (User, error) {
 		log.Errorf("JiraUserAdapter: Could not perform request: %v", err)
 		return User{}, err
 	}
-	user, err := userFromJson(body)
+	user, err := userFromJson(jiraUserAdapter, body)
 	if err != nil {
 		log.Errorf("JiraUserAdapter: Could not parse response body %v", err)
 		return User{}, err
@@ -123,7 +123,7 @@ func (jiraUserAdapter JiraUserAdapter) User(accountId string) (User, error) {
 		log.Errorf("JiraUserAdapter: Could not perform request: %v", err)
 		return User{}, nil
 	}
-	user, err := userFromJson(body)
+	user, err := userFromJson(jiraUserAdapter, body)
 	if err != nil {
 		log.Errorf("JiraUserAdapter: Could not parse response body: %v", err)
 		return User{}, nil
@@ -155,7 +155,7 @@ func (jiraUserAdapter JiraUserAdapter) Users(accountIds []string) ([]User, error
 		log.Errorf("JiraUserAdapter: Could not perform request: %v", err)
 		return nil, err
 	}
-	users, err := usersFromJson(body)
+	users, err := usersFromJson(jiraUserAdapter, body)
 	if err != nil {
 		log.Errorf("JiraUserAdapter: Could not parse response body: %v", err)
 	}
