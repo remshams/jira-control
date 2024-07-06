@@ -1,0 +1,21 @@
+meta {
+  name: Submit
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://api.tempo.io/4/timesheet-approvals/user/{{accountId}}/submit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tempo-api-token}}
+}
+
+body:json {
+  {
+    "reviewerAccountId": {{reviewerAccountId}}
+  }
+}
