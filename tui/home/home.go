@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
+	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/tabs"
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
@@ -23,12 +24,16 @@ import (
 	worklog_details "github.com/remshams/jira-control/tui/worklog/details"
 )
 
+type loadUserData struct{}
+type initAction struct{}
+
 const (
 	stateIssue       utils.ViewState = "issue"
 	stateWorklog     utils.ViewState = "worklog"
 	stateLastUpdated utils.ViewState = "last_updated"
 	stateFavorites   utils.ViewState = "favorites"
 	stateTempo       utils.ViewState = "tempo"
+	stateInit        utils.ViewState = "init"
 )
 
 type Model struct {
@@ -43,6 +48,7 @@ type Model struct {
 	lastUpdated tui_last_updated.Model
 	favorites   favorite_home.Model
 	state       utils.ViewState
+	spinner     spinner.Model
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
@@ -58,7 +64,8 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		issue:       issue_home.New(adapter),
 		lastUpdated: tui_last_updated.New(adapter),
 		favorites:   favorite_home.New(adapter),
-		state:       stateWorklog,
+		state:       stateInit,
+		spinner:     spinner.New().WithLabel("App init..."),
 	}
 }
 
@@ -66,6 +73,7 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.tab.Init(),
 		m.worklog.Init(),
+		m.spinner.Tick(),
 	)
 }
 
@@ -121,6 +129,8 @@ func (m *Model) processTab(msg tabs.TabSelectedMsg) tea.Cmd {
 func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch m.state {
+	case stateInit:
+		m.spinner, cmd = m.spinner.Update(msg)
 	case stateIssue:
 		cmd = m.processIssueUpdate(msg)
 	case stateWorklog:
@@ -189,14 +199,18 @@ func (m *Model) logWork(issueKey string, hoursSpent *float64) tea.Cmd {
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf(
-		"%s\n%s\n%s\n%s\n%s",
-		m.title.View(),
-		m.renderTab(),
-		m.renderContent(),
-		m.renderHelp(),
-		m.renderToast(),
-	)
+	if m.state == stateInit {
+		return m.spinner.View()
+	} else {
+		return fmt.Sprintf(
+			"%s\n%s\n%s\n%s\n%s",
+			m.title.View(),
+			m.renderTab(),
+			m.renderContent(),
+			m.renderHelp(),
+			m.renderToast(),
+		)
+	}
 }
 
 func (m Model) renderTab() string {
@@ -217,6 +231,8 @@ func (m Model) renderContent() string {
 		return style.Render(m.favorites.View())
 	case stateTempo:
 		return style.Render(m.tempo.View())
+	case stateInit:
+		return m.spinner.View()
 	default:
 		return "View does not exist"
 	}
