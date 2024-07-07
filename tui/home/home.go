@@ -13,6 +13,7 @@ import (
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
+	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
 	favorite_home "github.com/remshams/jira-control/tui/favorits/home"
@@ -24,8 +25,35 @@ import (
 	worklog_details "github.com/remshams/jira-control/tui/worklog/details"
 )
 
-type loadUserData struct{}
-type initAction struct{}
+type loadUserDataSuccessAction struct {
+	User jira.User
+}
+type loadUserDataErrorAction struct {
+	Error error
+}
+
+func createLoadUserDataAction(adapter jira.UserAdapter) tea.Cmd {
+	return func() tea.Msg {
+		userChan := make(chan jira.User)
+		errorChan := make(chan error)
+		go loadUser(adapter, userChan, errorChan)
+		select {
+		case user := <-userChan:
+			return loadUserDataSuccessAction{User: user}
+		case error := <-errorChan:
+			return loadUserDataErrorAction{Error: error}
+		}
+	}
+}
+
+func loadUser(adapter jira.UserAdapter, userChan chan jira.User, errorChan chan error) {
+	user, err := adapter.Myself()
+	if err != nil {
+		errorChan <- err
+	} else {
+		userChan <- user
+	}
+}
 
 const (
 	stateIssue       utils.ViewState = "issue"
@@ -33,7 +61,8 @@ const (
 	stateLastUpdated utils.ViewState = "last_updated"
 	stateFavorites   utils.ViewState = "favorites"
 	stateTempo       utils.ViewState = "tempo"
-	stateInit        utils.ViewState = "init"
+	stateLoading     utils.ViewState = "loading"
+	stateInitError   utils.ViewState = "initError"
 )
 
 type Model struct {
@@ -53,6 +82,7 @@ type Model struct {
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
+		adapter: adapter,
 		tab: tabs.New(
 			[]string{"Worklog", "Issues", "Last Updated", "Favorites", "Tempo"},
 		),
@@ -64,8 +94,8 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		issue:       issue_home.New(adapter),
 		lastUpdated: tui_last_updated.New(adapter),
 		favorites:   favorite_home.New(adapter),
-		state:       stateInit,
-		spinner:     spinner.New().WithLabel("App init..."),
+		state:       stateLoading,
+		spinner:     spinner.New().WithLabel("Loading account data..."),
 	}
 }
 
@@ -74,6 +104,7 @@ func (m Model) Init() tea.Cmd {
 		m.tab.Init(),
 		m.worklog.Init(),
 		m.spinner.Tick(),
+		createLoadUserDataAction(m.adapter.App.UserAdapter),
 	)
 }
 
@@ -129,8 +160,8 @@ func (m *Model) processTab(msg tabs.TabSelectedMsg) tea.Cmd {
 func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch m.state {
-	case stateInit:
-		m.spinner, cmd = m.spinner.Update(msg)
+	case stateLoading:
+		cmd = m.processLoadingUpdate(msg)
 	case stateIssue:
 		cmd = m.processIssueUpdate(msg)
 	case stateWorklog:
@@ -141,6 +172,18 @@ func (m *Model) processUpdate(msg tea.Msg) tea.Cmd {
 		cmd = m.processFavoritesUpdate(msg)
 	case stateTempo:
 		cmd = m.processTempoUpdate(msg)
+	}
+	return cmd
+}
+
+func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case loadUserDataSuccessAction:
+		app_store.AppDataStore.Account = msg.User
+		m.state = stateWorklog
+	case loadUserDataErrorAction:
+		m.state = stateInitError
 	}
 	return cmd
 }
@@ -199,9 +242,12 @@ func (m *Model) logWork(issueKey string, hoursSpent *float64) tea.Cmd {
 }
 
 func (m Model) View() string {
-	if m.state == stateInit {
+	switch m.state {
+	case stateLoading:
 		return m.spinner.View()
-	} else {
+	case stateInitError:
+		return "Could not initialize app"
+	default:
 		return fmt.Sprintf(
 			"%s\n%s\n%s\n%s\n%s",
 			m.title.View(),
@@ -231,7 +277,7 @@ func (m Model) renderContent() string {
 		return style.Render(m.favorites.View())
 	case stateTempo:
 		return style.Render(m.tempo.View())
-	case stateInit:
+	case stateLoading:
 		return m.spinner.View()
 	default:
 		return "View does not exist"

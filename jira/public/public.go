@@ -6,6 +6,7 @@ import (
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
 	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
+	"github.com/remshams/jira-control/jira/user"
 	"github.com/remshams/jira-control/jira/utils"
 )
 
@@ -21,6 +22,8 @@ type Sorting = utils.Sorting
 type Favorite = favorite.Favorite
 type TempoWorklog = tempo_worklog.Worklog
 type TempoWorklogListQuery = tempo_worklog.WorklogListQuery
+type User = user.User
+type UserAdapter = user.UserAdapter
 type App = app.App
 
 const (
