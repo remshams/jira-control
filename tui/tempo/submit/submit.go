@@ -13,6 +13,7 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
@@ -100,12 +101,14 @@ type SubmitKeymap struct {
 	help        help.KeyMap
 	table       table.KeyMap
 	worklogList key.Binding
+	submit      key.Binding
 }
 
 func (m SubmitKeymap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
 		m.worklogList,
 		m.help.Help,
+		m.submit,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
 }
@@ -124,6 +127,10 @@ var SubmitKeys = SubmitKeymap{
 	worklogList: key.NewBinding(
 		key.WithKeys("l"),
 		key.WithHelp("l", "Show worklog list"),
+	),
+	submit: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "Submit and close timesheet"),
 	),
 }
 
@@ -203,6 +210,14 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, SubmitKeys.worklogList):
 			cmd = createSwitchToWorklogListView
+		case key.Matches(msg, SubmitKeys.submit):
+			reviewerAccountId := m.table.SelectedRowCell(0)
+			err := m.timesheet.Submit(reviewerAccountId)
+			if err != nil {
+				cmd = toast.CreateErrorToastAction("Could not submit timesheet")
+			} else {
+				cmd = tea.Batch(toast.CreateSuccessToastAction("Timesheet submitted"), m.loadTimesheetInfo())
+			}
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}
@@ -277,8 +292,9 @@ func (m Model) renderKeyValue(key string, value string) string {
 
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
-		{Title: "Name", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, 40)},
-		{Title: "Email", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, 40)},
+		{Title: "AccountId", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},
+		{Title: "Name", Width: styles.CalculateDimensionsFromPercentage(45, tableWidth, 40)},
+		{Title: "Email", Width: styles.CalculateDimensionsFromPercentage(45, tableWidth, 40)},
 	}
 }
 
@@ -288,6 +304,7 @@ func createTableRows(reviewers []jira.User) []table.Row {
 	log.Debugf("Reviewers: %d", len(reviewers))
 	for _, reviewer := range reviewers {
 		rows = append(rows, table.Row{
+			reviewer.AccountId,
 			reviewer.Name,
 			reviewer.Email,
 		})
