@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
@@ -139,14 +140,19 @@ type Model struct {
 	reviewers       []jira.User
 	state           utils.ViewState
 	spinner         spinner.Model
+	table           table.Model[[]jira.User]
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
-	return Model{
+	model := Model{
 		adapter: adapter,
 		state:   stateLoading,
 		spinner: spinner.New().WithLabel("Loading timesheet details..."),
 	}
+	model.table = table.
+		New(createTableColumns, createTableRows, 5, 20).
+		WithNotDataMessage("No reviewers")
+	return model
 }
 
 func (m Model) Init() tea.Cmd {
@@ -179,6 +185,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 		m.timesheetStatus = msg.Status
 		m.reviewers = msg.Reviewers
 		m.state = stateLoaded
+		cmd = table.CreateTableDataUpdatedAction(m.reviewers)
 	case loadTimesheetInfoErrorAction:
 		m.state = stateLoadingError
 		m.timesheetStatus = jira.TimesheetStatus{}
@@ -196,7 +203,11 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, SubmitKeys.worklogList):
 			cmd = createSwitchToWorklogListView
+		default:
+			m.table, cmd = m.table.Update(msg)
 		}
+	default:
+		m.table, cmd = m.table.Update(msg)
 	}
 	return cmd
 }
@@ -208,9 +219,10 @@ func (m Model) View() string {
 	case stateLoaded:
 		styles := lipgloss.NewStyle().PaddingBottom(styles.Padding)
 		return fmt.Sprintf(
-			"%s\n%s",
+			"%s\n%s\n%s",
 			styles.Render(m.renderAccountInfo()),
-			m.renderTimesheetInfo(),
+			styles.Render(m.renderTimesheetInfo()),
+			m.table.View(),
 		)
 	case stateLoadingError:
 		return "Could not load timesheet details"
@@ -261,4 +273,24 @@ func (m Model) renderTimesheetInfo() string {
 
 func (m Model) renderKeyValue(key string, value string) string {
 	return fmt.Sprintf("%s%s %s", styles.TextAccentColor.Render(key), styles.TextAccentColor.Render(":"), value)
+}
+
+func createTableColumns(tableWidth int) []table.Column {
+	return []table.Column{
+		{Title: "Name", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, 40)},
+		{Title: "Email", Width: styles.CalculateDimensionsFromPercentage(50, tableWidth, 40)},
+	}
+}
+
+func createTableRows(reviewers []jira.User) []table.Row {
+	rows := []table.Row{}
+
+	log.Debugf("Reviewers: %d", len(reviewers))
+	for _, reviewer := range reviewers {
+		rows = append(rows, table.Row{
+			reviewer.Name,
+			reviewer.Email,
+		})
+	}
+	return rows
 }
