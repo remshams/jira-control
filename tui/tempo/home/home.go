@@ -44,13 +44,25 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.worklogList, cmd = m.worklogList.Update(msg)
+	switch msg.(type) {
+	case tempo_workloglist.SwitchToSubmitViewAction:
+		m.state = stateSubmit
+		cmd = m.submit.Init()
+	default:
+		m.worklogList, cmd = m.worklogList.Update(msg)
+	}
 	return cmd
 }
 
 func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.submit, cmd = m.submit.Update(msg)
+	switch msg.(type) {
+	case tempo_submit.SwitchToWorklogListView:
+		m.state = stateWorklog
+		cmd = m.worklogList.Init()
+	default:
+		m.submit, cmd = m.submit.Update(msg)
+	}
 	return cmd
 }
 

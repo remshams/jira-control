@@ -18,6 +18,12 @@ import (
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 
+type SwitchToSubmitViewAction struct{}
+
+func createSwitchToSubmitViewAction() tea.Msg {
+	return SwitchToSubmitViewAction{}
+}
+
 type initAction struct{}
 
 func createInitAction() tea.Msg {
@@ -59,10 +65,12 @@ type WorklogListKeyMap struct {
 	global common.GlobalKeyMap
 	help   help.KeyMap
 	table  table.KeyMap
+	submit key.Binding
 }
 
 func (m WorklogListKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
+		m.submit,
 		m.help.Help,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
@@ -79,6 +87,10 @@ var WorklogListKeys = WorklogListKeyMap{
 	global: common.GlobalKeys,
 	help:   help.HelpKeys,
 	table:  table.DefaultKeyMap,
+	submit: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "Submit timesheet"),
+	),
 }
 
 const (
@@ -152,6 +164,11 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	case initAction:
 		m.state = tempoWorklogStateLoading
 		cmd = createLoadWorklogsAction(m.adapter)
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, WorklogListKeys.submit):
+			cmd = createSwitchToSubmitViewAction
+		}
 	default:
 		m.table, cmd = m.table.Update(msg)
 	}
