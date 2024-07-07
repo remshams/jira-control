@@ -1,13 +1,17 @@
 package tempo_submit
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/styles"
 	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
+	app_store "github.com/remshams/jira-control/tui/store"
 )
 
 type SwitchToWorklogListView struct{}
@@ -84,5 +88,27 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 }
 
 func (m Model) View() string {
-	return "Submit timesheet"
+	return fmt.Sprintf("%s", m.renderAccountInfo())
+}
+
+func (m Model) renderAccountInfo() string {
+	return fmt.Sprintf(
+		"%s\n%s\n%s",
+		m.renderKeyValue(
+			"AccountId",
+			app_store.AppDataStore.Account.AccountId,
+		),
+		m.renderKeyValue(
+			"Name",
+			app_store.AppDataStore.Account.Name,
+		),
+		m.renderKeyValue(
+			"Email",
+			app_store.AppDataStore.Account.Email,
+		),
+	)
+}
+
+func (m Model) renderKeyValue(key string, value string) string {
+	return fmt.Sprintf("%s%s %s", styles.TextAccentColor.Render(key), styles.TextAccentColor.Render(":"), value)
 }
