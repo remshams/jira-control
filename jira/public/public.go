@@ -5,6 +5,7 @@ import (
 	"github.com/remshams/jira-control/jira/favorite"
 	"github.com/remshams/jira-control/jira/issue"
 	issue_worklog "github.com/remshams/jira-control/jira/issue/worklog"
+	"github.com/remshams/jira-control/jira/tempo/tempo_timesheet"
 	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
 	"github.com/remshams/jira-control/jira/user"
 	"github.com/remshams/jira-control/jira/utils"
@@ -24,6 +25,7 @@ type TempoWorklog = tempo_worklog.Worklog
 type TempoWorklogListQuery = tempo_worklog.WorklogListQuery
 type User = user.User
 type UserAdapter = user.UserAdapter
+type TimesheetAdapter = tempo_timesheet.TimesheetAdapter
 type App = app.App
 
 const (
