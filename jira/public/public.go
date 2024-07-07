@@ -25,6 +25,8 @@ type TempoWorklog = tempo_worklog.Worklog
 type TempoWorklogListQuery = tempo_worklog.WorklogListQuery
 type User = user.User
 type UserAdapter = user.UserAdapter
+type Timesheet = tempo_timesheet.Timesheet
+type TimesheetStatus = tempo_timesheet.TimesheetStatus
 type TimesheetAdapter = tempo_timesheet.TimesheetAdapter
 type App = app.App
 
@@ -63,4 +65,8 @@ func PrepareApplication() (*app.App, error) {
 
 func NewTempoWorklogListQuery(adapter tempo_worklog.WorklogListAdapter) tempo_worklog.WorklogListQuery {
 	return tempo_worklog.NewWorkloglistQuery(adapter)
+}
+
+func NewTimesheet(adapter tempo_timesheet.TimesheetAdapter, accountId string) tempo_timesheet.Timesheet {
+	return tempo_timesheet.NewTimesheet(adapter, accountId)
 }
