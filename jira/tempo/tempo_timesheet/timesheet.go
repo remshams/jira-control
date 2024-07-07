@@ -8,16 +8,16 @@ import (
 )
 
 type TimesheetStatus struct {
-	status        string
-	requiredHours int
-	spentHours    int
+	Status        string
+	RequiredHours int
+	SpentHours    int
 }
 
 func NewTimesheetStatus(status string, requiredHours int, spentHours int) TimesheetStatus {
 	return TimesheetStatus{
-		status:        status,
-		requiredHours: requiredHours,
-		spentHours:    spentHours,
+		Status:        status,
+		RequiredHours: requiredHours,
+		SpentHours:    spentHours,
 	}
 }
 
