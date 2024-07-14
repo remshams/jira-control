@@ -3,7 +3,6 @@ package tempo_submit
 import (
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,60 +21,36 @@ import (
 	app_store "github.com/remshams/jira-control/tui/store"
 )
 
-var wg sync.WaitGroup
-
 type initAction struct{}
 
 func createInitAction() tea.Msg {
 	return initAction{}
 }
 
-type loadTimesheetInfoSuccessAction struct {
-	Status    jira.TimesheetStatus
+type loadTimesheetReviewersSuccessAction struct {
 	Reviewers []jira.User
 }
 
-type loadTimesheetInfoErrorAction struct{}
+type loadReviewersErrorAction struct{}
 
-func (m Model) loadTimesheetInfo() tea.Cmd {
+func (m Model) createLoadReviewersAction() tea.Cmd {
 	return func() tea.Msg {
-		var status jira.TimesheetStatus
 		var reviewers []jira.User
 		var err error
-		statusChan := make(chan jira.TimesheetStatus)
 		reviewersChan := make(chan []jira.User)
 		errorChan := make(chan error)
-		wg.Add(2)
-		go m.loadTimesheetStatus(statusChan, errorChan)
 		go m.loadReviewers(reviewersChan, errorChan)
-		select {
-		case status = <-statusChan:
-		case err = <-errorChan:
-		}
 		select {
 		case reviewers = <-reviewersChan:
 		case err = <-errorChan:
 		}
-		wg.Wait()
 		if err != nil {
-			return loadTimesheetInfoErrorAction{}
+			return loadReviewersErrorAction{}
 		} else {
-			return loadTimesheetInfoSuccessAction{
-				Status:    status,
+			return loadTimesheetReviewersSuccessAction{
 				Reviewers: reviewers,
 			}
 		}
-	}
-}
-
-func (m Model) loadTimesheetStatus(statusChan chan jira.TimesheetStatus, errorChan chan error) {
-	status, err := m.timesheet.Status()
-	if err != nil {
-		errorChan <- err
-		wg.Done()
-	} else {
-		statusChan <- status
-		wg.Done()
 	}
 }
 
@@ -83,10 +58,8 @@ func (m Model) loadReviewers(reviewersChan chan []jira.User, errorChan chan erro
 	reviewers, err := m.timesheet.Reviewers()
 	if err != nil {
 		errorChan <- err
-		wg.Done()
 	} else {
 		reviewersChan <- reviewers
-		wg.Done()
 	}
 }
 
@@ -162,8 +135,9 @@ func New(adapter tui_jira.JiraAdapter) Model {
 	return model
 }
 
-func (m *Model) Init(timesheet jira.Timesheet) tea.Cmd {
+func (m *Model) Init(timesheet jira.Timesheet, timesheetStatus jira.TimesheetStatus) tea.Cmd {
 	m.timesheet = timesheet
+	m.timesheetStatus = timesheetStatus
 	return tea.Batch(
 		title.CreateSetPageTitleMsg("Submit timesheet"),
 		help.CreateSetKeyMapMsg(SubmitKeys),
@@ -188,13 +162,12 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case initAction:
 		m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, app_store.AppDataStore.Account.AccountId)
-		cmd = m.loadTimesheetInfo()
-	case loadTimesheetInfoSuccessAction:
-		m.timesheetStatus = msg.Status
+		cmd = m.createLoadReviewersAction()
+	case loadTimesheetReviewersSuccessAction:
 		m.reviewers = msg.Reviewers
 		m.state = stateLoaded
 		cmd = table.CreateTableDataUpdatedAction(m.reviewers)
-	case loadTimesheetInfoErrorAction:
+	case loadReviewersErrorAction:
 		m.state = stateLoadingError
 		m.timesheetStatus = jira.TimesheetStatus{}
 		m.reviewers = []jira.User{}
@@ -217,7 +190,7 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 			if err != nil {
 				cmd = toast.CreateErrorToastAction("Could not submit timesheet")
 			} else {
-				cmd = tea.Batch(toast.CreateSuccessToastAction("Timesheet submitted"), m.loadTimesheetInfo())
+				cmd = tea.Batch(toast.CreateSuccessToastAction("Timesheet submitted"), m.createLoadReviewersAction())
 			}
 		default:
 			m.table, cmd = m.table.Update(msg)
