@@ -162,7 +162,8 @@ func New(adapter tui_jira.JiraAdapter) Model {
 	return model
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init(timesheet jira.Timesheet) tea.Cmd {
+	m.timesheet = timesheet
 	return tea.Batch(
 		title.CreateSetPageTitleMsg("Submit timesheet"),
 		help.CreateSetKeyMapMsg(SubmitKeys),

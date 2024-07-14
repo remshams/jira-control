@@ -3,7 +3,9 @@ package tempo_home
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/utils"
+	jira "github.com/remshams/jira-control/jira/public"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
+	app_store "github.com/remshams/jira-control/tui/store"
 	tempo_workloglist "github.com/remshams/jira-control/tui/tempo/list"
 	tempo_submit "github.com/remshams/jira-control/tui/tempo/submit"
 )
@@ -16,18 +18,22 @@ const (
 type Model struct {
 	worklogList tempo_workloglist.Model
 	submit      tempo_submit.Model
+	adapter     tui_jira.JiraAdapter
+	timesheet   jira.Timesheet
 	state       utils.ViewState
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	return Model{
+		adapter:     adapter,
 		worklogList: tempo_workloglist.New(adapter),
 		submit:      tempo_submit.New(adapter),
 		state:       stateWorklog,
 	}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
+	m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, app_store.AppDataStore.Account.AccountId)
 	return m.worklogList.Init()
 }
 
@@ -47,7 +53,7 @@ func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	switch msg.(type) {
 	case tempo_workloglist.SwitchToSubmitViewAction:
 		m.state = stateSubmit
-		cmd = m.submit.Init()
+		cmd = m.submit.Init(m.timesheet)
 	default:
 		m.worklogList, cmd = m.worklogList.Update(msg)
 	}
