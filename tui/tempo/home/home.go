@@ -70,7 +70,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 }
 
 func (m *Model) Init() tea.Cmd {
-	m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, app_store.AppDataStore.Account.AccountId)
+	m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, m.adapter.App.TempoWorklogAdapter, app_store.AppDataStore.Account.AccountId)
 	return tea.Batch(m.createLoadTimesheetStatusAction(), m.spinner.Tick())
 }
 
@@ -93,7 +93,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	case loadTimesheetStatusSuccessAction:
 		m.timesheetStatus = msg.Status
 		m.state = stateWorklog
-		cmd = m.worklogList.Init()
+		m.worklogList, cmd = m.worklogList.Init(m.timesheet)
 	case loadTimesheetStatusErrorAction:
 		m.timesheetStatus = jira.TimesheetStatus{}
 		m.state = stateLoadingError
@@ -108,7 +108,7 @@ func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	switch msg.(type) {
 	case tempo_workloglist.SwitchToSubmitViewAction:
 		m.state = stateSubmit
-		cmd = m.submit.Init(m.timesheet, m.timesheetStatus)
+		m.submit, cmd = m.submit.Init(m.timesheet, m.timesheetStatus)
 	default:
 		m.worklogList, cmd = m.worklogList.Update(msg)
 	}
@@ -120,7 +120,7 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 	switch msg.(type) {
 	case tempo_submit.SwitchToWorklogListView:
 		m.state = stateWorklog
-		cmd = m.worklogList.Init()
+		m.worklogList, cmd = m.worklogList.Init(m.timesheet)
 	default:
 		m.submit, cmd = m.submit.Update(msg)
 	}

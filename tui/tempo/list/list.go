@@ -36,11 +36,11 @@ type LoadWorklogsSuccessAction struct {
 
 type LoadWorklogsErrorAction struct{}
 
-func createLoadWorklogsAction(adapter tui_jira.JiraAdapter) tea.Cmd {
+func (m Model) createLoadWorklogsAction() tea.Cmd {
 	return func() tea.Msg {
 		worklogsChan := make(chan []jira.TempoWorklog)
 		errorChan := make(chan error)
-		go loadWorklogs(adapter, worklogsChan, errorChan)
+		go m.loadWorklogs(worklogsChan, errorChan)
 		select {
 		case worklogs := <-worklogsChan:
 			return LoadWorklogsSuccessAction{Worklogs: worklogs}
@@ -50,10 +50,8 @@ func createLoadWorklogsAction(adapter tui_jira.JiraAdapter) tea.Cmd {
 	}
 }
 
-func loadWorklogs(adapter tui_jira.JiraAdapter, worklogsChan chan []jira.TempoWorklog, errorChan chan error) {
-	worklogs, err := jira.NewTempoWorklogListQuery(adapter.App.TempoWorklogAdapter).
-		WithSortDescending().
-		Search()
+func (m Model) loadWorklogs(worklogsChan chan []jira.TempoWorklog, errorChan chan error) {
+	worklogs, err := m.timesheet.Worklogs(jira.NewTempoWorklogListQuery().WithSortDescending())
 	if err != nil {
 		errorChan <- err
 	} else {
@@ -100,11 +98,12 @@ const (
 )
 
 type Model struct {
-	adapter  tui_jira.JiraAdapter
-	state    utils.ViewState
-	worklogs []jira.TempoWorklog
-	table    table.Model[[]jira.TempoWorklog]
-	spinner  spinner.Model
+	adapter   tui_jira.JiraAdapter
+	state     utils.ViewState
+	timesheet jira.Timesheet
+	worklogs  []jira.TempoWorklog
+	table     table.Model[[]jira.TempoWorklog]
+	spinner   spinner.Model
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
@@ -119,13 +118,16 @@ func New(adapter tui_jira.JiraAdapter) Model {
 	return model
 }
 
-func (m Model) Init() tea.Cmd {
-	return tea.Batch(
+func (m Model) Init(timesheet jira.Timesheet) (Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.timesheet = timesheet
+	cmd = tea.Batch(
 		title.CreateSetPageTitleMsg("Tempo worklog list"),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
 		m.spinner.Tick(),
 		createInitAction,
 	)
+	return m, cmd
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -144,7 +146,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case initAction:
 		m.state = tempoWorklogStateLoading
-		cmd = createLoadWorklogsAction(m.adapter)
+		cmd = m.createLoadWorklogsAction()
 	case LoadWorklogsSuccessAction:
 		m.state = tempoWorklogStateLoaded
 		m.worklogs = msg.Worklogs
@@ -163,7 +165,7 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case initAction:
 		m.state = tempoWorklogStateLoading
-		cmd = createLoadWorklogsAction(m.adapter)
+		cmd = m.createLoadWorklogsAction()
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, WorklogListKeys.submit):

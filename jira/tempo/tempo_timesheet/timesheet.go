@@ -4,6 +4,7 @@ import (
 	"time"
 
 	utils_time "github.com/remshams/common/utils/time"
+	tempo_worklog "github.com/remshams/jira-control/jira/tempo/worklog"
 	"github.com/remshams/jira-control/jira/user"
 )
 
@@ -28,14 +29,16 @@ type TimesheetAdapter interface {
 }
 
 type Timesheet struct {
-	adapter   TimesheetAdapter
-	AccountId string
+	adapter            TimesheetAdapter
+	worklogListAdapter tempo_worklog.WorklogListAdapter
+	AccountId          string
 }
 
-func NewTimesheet(adapter TimesheetAdapter, accountId string) Timesheet {
+func NewTimesheet(adapter TimesheetAdapter, worklogListAdapter tempo_worklog.WorklogListAdapter, accountId string) Timesheet {
 	return Timesheet{
-		adapter:   adapter,
-		AccountId: accountId,
+		adapter:            adapter,
+		worklogListAdapter: worklogListAdapter,
+		AccountId:          accountId,
 	}
 }
 
@@ -51,4 +54,8 @@ func (timesheet Timesheet) Status() (TimesheetStatus, error) {
 func (timesheet Timesheet) Submit(reviewerAccountId string) error {
 	startOfMonth, endOfMonth := utils_time.GetStartAndEndOfMonth(time.Now())
 	return timesheet.adapter.Submit(timesheet.AccountId, reviewerAccountId, startOfMonth, endOfMonth)
+}
+
+func (timesheet Timesheet) Worklogs(query tempo_worklog.WorklogListQuery) ([]tempo_worklog.Worklog, error) {
+	return query.WithSortDescending().Search(timesheet.worklogListAdapter)
 }

@@ -135,15 +135,17 @@ func New(adapter tui_jira.JiraAdapter) Model {
 	return model
 }
 
-func (m *Model) Init(timesheet jira.Timesheet, timesheetStatus jira.TimesheetStatus) tea.Cmd {
+func (m Model) Init(timesheet jira.Timesheet, timesheetStatus jira.TimesheetStatus) (Model, tea.Cmd) {
+	var cmd tea.Cmd
 	m.timesheet = timesheet
 	m.timesheetStatus = timesheetStatus
-	return tea.Batch(
+	cmd = tea.Batch(
 		title.CreateSetPageTitleMsg("Submit timesheet"),
 		help.CreateSetKeyMapMsg(SubmitKeys),
 		m.spinner.Tick(),
 		createInitAction,
 	)
+	return m, cmd
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -161,7 +163,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case initAction:
-		m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, app_store.AppDataStore.Account.AccountId)
+		m.timesheet = jira.NewTimesheet(m.adapter.App.TempoTimesheetAdapter, m.adapter.App.TempoWorklogAdapter, app_store.AppDataStore.Account.AccountId)
 		cmd = m.createLoadReviewersAction()
 	case loadTimesheetReviewersSuccessAction:
 		m.reviewers = msg.Reviewers

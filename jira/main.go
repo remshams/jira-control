@@ -26,7 +26,7 @@ func main() {
 	log.Debugf("User: %s %s", user.AccountId, user.Name)
 	users, err := app.UserAdapter.Users([]string{user.AccountId})
 	log.Debugf("Users: %v", users)
-	timesheet := tempo_timesheet.NewTimesheet(app.TempoTimesheetAdapter, users[0].AccountId)
+	timesheet := tempo_timesheet.NewTimesheet(app.TempoTimesheetAdapter, app.TempoWorklogAdapter, users[0].AccountId)
 	reviewers, err := timesheet.Reviewers()
 	log.Debugf("Reviewers: %v", reviewers)
 	status, err := timesheet.Status()

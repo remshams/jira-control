@@ -6,16 +6,14 @@ import (
 )
 
 type WorklogListQuery struct {
-	adapter        WorklogListAdapter
 	from           time.Time
 	to             time.Time
 	sortDescending bool
 }
 
-func NewWorkloglistQuery(adapter WorklogListAdapter) WorklogListQuery {
+func NewWorkloglistQuery() WorklogListQuery {
 	now := time.Now()
 	return WorklogListQuery{
-		adapter:        adapter,
 		from:           time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()),
 		to:             time.Date(now.Year(), now.Month(), now.Day(), 24, 59, 59, 0, now.Location()),
 		sortDescending: false,
@@ -37,8 +35,8 @@ func (w WorklogListQuery) WithSortDescending() WorklogListQuery {
 	return w
 }
 
-func (w WorklogListQuery) Search() ([]Worklog, error) {
-	worklogs, err := w.adapter.List(w)
+func (w WorklogListQuery) Search(adapter WorklogListAdapter) ([]Worklog, error) {
+	worklogs, err := adapter.List(w)
 	if err != nil {
 		return []Worklog{}, err
 	}

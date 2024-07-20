@@ -63,10 +63,10 @@ func PrepareApplication() (*app.App, error) {
 	return app.AppFromEnv()
 }
 
-func NewTempoWorklogListQuery(adapter tempo_worklog.WorklogListAdapter) tempo_worklog.WorklogListQuery {
-	return tempo_worklog.NewWorkloglistQuery(adapter)
+func NewTempoWorklogListQuery() tempo_worklog.WorklogListQuery {
+	return tempo_worklog.NewWorkloglistQuery()
 }
 
-func NewTimesheet(adapter tempo_timesheet.TimesheetAdapter, accountId string) tempo_timesheet.Timesheet {
-	return tempo_timesheet.NewTimesheet(adapter, accountId)
+func NewTimesheet(adapter tempo_timesheet.TimesheetAdapter, worklogListAdapter tempo_worklog.WorklogListAdapter, accountId string) tempo_timesheet.Timesheet {
+	return tempo_timesheet.NewTimesheet(adapter, worklogListAdapter, accountId)
 }
