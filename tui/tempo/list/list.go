@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/remshams/common/tui/bubbles/help"
 	title "github.com/remshams/common/tui/bubbles/page_title"
@@ -16,6 +17,7 @@ import (
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
+	tempo_status "github.com/remshams/jira-control/tui/tempo/status"
 )
 
 type SwitchToSubmitViewAction struct{}
@@ -98,34 +100,39 @@ const (
 )
 
 type Model struct {
-	adapter   tui_jira.JiraAdapter
-	state     utils.ViewState
-	timesheet jira.Timesheet
-	worklogs  []jira.TempoWorklog
-	table     table.Model[[]jira.TempoWorklog]
-	spinner   spinner.Model
+	adapter         tui_jira.JiraAdapter
+	state           utils.ViewState
+	timesheet       jira.Timesheet
+	timesheetStatus tempo_status.Model
+	worklogs        []jira.TempoWorklog
+	table           table.Model[[]jira.TempoWorklog]
+	spinner         spinner.Model
 }
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	model := Model{
-		adapter: adapter,
-		state:   tempoWorklogStateLoading,
-		spinner: spinner.New().WithLabel("Loading worklogs..."),
+		adapter:         adapter,
+		state:           tempoWorklogStateLoading,
+		spinner:         spinner.New().WithLabel("Loading worklogs..."),
+		timesheetStatus: tempo_status.New(),
 	}
 	model.table = table.
-		New(createTableColumns, createTableRows, 5, 10).
+		New(createTableColumns, createTableRows, 5, 15).
 		WithNotDataMessage("No worklogs")
 	return model
 }
 
-func (m Model) Init(timesheet jira.Timesheet) (Model, tea.Cmd) {
+func (m Model) Init(timesheet jira.Timesheet, timesheetStatus jira.TimesheetStatus) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	var timesheetStatusCmd tea.Cmd
 	m.timesheet = timesheet
+	m.timesheetStatus, timesheetStatusCmd = m.timesheetStatus.Init(timesheetStatus)
 	cmd = tea.Batch(
 		title.CreateSetPageTitleMsg("Tempo worklog list"),
 		help.CreateSetKeyMapMsg(WorklogListKeys),
 		m.spinner.Tick(),
 		createInitAction,
+		timesheetStatusCmd,
 	)
 	return m, cmd
 }
@@ -178,9 +185,10 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 }
 
 func (m Model) View() string {
+	styles := lipgloss.NewStyle().PaddingBottom(styles.Padding)
 	switch m.state {
 	case tempoWorklogStateLoaded:
-		return m.table.View()
+		return fmt.Sprintf("%s\n%s", styles.Render(m.timesheetStatus.View()), styles.Render(m.table.View()))
 	case tempoWorklogStateLoading:
 		return m.spinner.View()
 	case tempoWorklogStateError:
@@ -189,6 +197,7 @@ func (m Model) View() string {
 		return ""
 	}
 }
+
 func createTableColumns(tableWidth int) []table.Column {
 	return []table.Column{
 		{Title: "Id", Width: styles.CalculateDimensionsFromPercentage(10, tableWidth, 10)},

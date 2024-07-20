@@ -93,7 +93,7 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 	case loadTimesheetStatusSuccessAction:
 		m.timesheetStatus = msg.Status
 		m.state = stateWorklog
-		m.worklogList, cmd = m.worklogList.Init(m.timesheet)
+		m.worklogList, cmd = m.worklogList.Init(m.timesheet, m.timesheetStatus)
 	case loadTimesheetStatusErrorAction:
 		m.timesheetStatus = jira.TimesheetStatus{}
 		m.state = stateLoadingError
@@ -120,7 +120,7 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 	switch msg.(type) {
 	case tempo_submit.SwitchToWorklogListView:
 		m.state = stateWorklog
-		m.worklogList, cmd = m.worklogList.Init(m.timesheet)
+		m.worklogList, cmd = m.worklogList.Init(m.timesheet, m.timesheetStatus)
 	default:
 		m.submit, cmd = m.submit.Update(msg)
 	}
