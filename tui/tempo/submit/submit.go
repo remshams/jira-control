@@ -2,7 +2,6 @@ package tempo_submit
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,6 +18,7 @@ import (
 	common "github.com/remshams/jira-control/tui/_common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
+	tempo_status "github.com/remshams/jira-control/tui/tempo/status"
 )
 
 type initAction struct{}
@@ -116,7 +116,7 @@ const (
 type Model struct {
 	adapter         tui_jira.JiraAdapter
 	timesheet       jira.Timesheet
-	timesheetStatus jira.TimesheetStatus
+	timesheetStatus tempo_status.Model
 	reviewers       []jira.User
 	state           utils.ViewState
 	spinner         spinner.Model
@@ -125,9 +125,10 @@ type Model struct {
 
 func New(adapter tui_jira.JiraAdapter) Model {
 	model := Model{
-		adapter: adapter,
-		state:   stateLoading,
-		spinner: spinner.New().WithLabel("Loading timesheet details..."),
+		adapter:         adapter,
+		state:           stateLoading,
+		timesheetStatus: tempo_status.New(),
+		spinner:         spinner.New().WithLabel("Loading timesheet details..."),
 	}
 	model.table = table.
 		New(createTableColumns, createTableRows, 5, 20).
@@ -137,13 +138,15 @@ func New(adapter tui_jira.JiraAdapter) Model {
 
 func (m Model) Init(timesheet jira.Timesheet, timesheetStatus jira.TimesheetStatus) (Model, tea.Cmd) {
 	var cmd tea.Cmd
+	var timesheetStatusCmd tea.Cmd
 	m.timesheet = timesheet
-	m.timesheetStatus = timesheetStatus
+	m.timesheetStatus, cmd = m.timesheetStatus.Init(timesheetStatus)
 	cmd = tea.Batch(
 		title.CreateSetPageTitleMsg("Submit timesheet"),
 		help.CreateSetKeyMapMsg(SubmitKeys),
 		m.spinner.Tick(),
 		createInitAction,
+		timesheetStatusCmd,
 	)
 	return m, cmd
 }
@@ -171,7 +174,6 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 		cmd = table.CreateTableDataUpdatedAction(m.reviewers)
 	case loadReviewersErrorAction:
 		m.state = stateLoadingError
-		m.timesheetStatus = jira.TimesheetStatus{}
 		m.reviewers = []jira.User{}
 	default:
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -212,7 +214,7 @@ func (m Model) View() string {
 		return fmt.Sprintf(
 			"%s\n%s\n%s",
 			styles.Render(m.renderAccountInfo()),
-			styles.Render(m.renderTimesheetInfo()),
+			styles.Render(m.timesheetStatus.View()),
 			m.table.View(),
 		)
 	case stateLoadingError:
@@ -236,28 +238,6 @@ func (m Model) renderAccountInfo() string {
 		m.renderKeyValue(
 			"Email",
 			app_store.AppDataStore.Account.Email,
-		),
-	)
-}
-
-func (m Model) renderTimesheetInfo() string {
-	spentHoursColor := styles.TextSuccessColor
-	if m.timesheetStatus.RequiredHours-m.timesheetStatus.SpentHours > 0 {
-		spentHoursColor = styles.TextErrorColor
-	}
-	return fmt.Sprintf(
-		"%s\n%s\n%s",
-		m.renderKeyValue(
-			"Required hours",
-			fmt.Sprintf("%d hours", m.timesheetStatus.RequiredHours),
-		),
-		m.renderKeyValue(
-			"Spent hours",
-			fmt.Sprintf("%s hours", spentHoursColor.Render(strconv.Itoa(m.timesheetStatus.SpentHours))),
-		),
-		m.renderKeyValue(
-			"Status",
-			m.timesheetStatus.Status,
 		),
 	)
 }
