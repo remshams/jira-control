@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/styles"
 	jira "github.com/remshams/jira-control/jira/public"
+	tui_common_utils "github.com/remshams/jira-control/tui/common/utils"
 )
 
 type Model struct {
@@ -29,21 +30,17 @@ func (m Model) View() string {
 	}
 	return fmt.Sprintf(
 		"%s\n%s\n%s",
-		renderKeyValue(
+		tui_common_utils.RenderKeyValue(
 			"Required hours",
 			fmt.Sprintf("%d hours", m.timesheetStatus.RequiredHours),
 		),
-		renderKeyValue(
+		tui_common_utils.RenderKeyValue(
 			"Spent hours",
 			fmt.Sprintf("%s hours", spentHoursColor.Render(strconv.Itoa(m.timesheetStatus.SpentHours))),
 		),
-		renderKeyValue(
+		tui_common_utils.RenderKeyValue(
 			"Status",
 			m.timesheetStatus.Status,
 		),
 	)
-}
-
-func renderKeyValue(key string, value string) string {
-	return fmt.Sprintf("%s%s %s", styles.TextAccentColor.Render(key), styles.TextAccentColor.Render(":"), value)
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/common"
+	common_utils "github.com/remshams/jira-control/tui/common/utils"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
 	tempo_status "github.com/remshams/jira-control/tui/tempo/status"
@@ -227,23 +228,19 @@ func (m Model) View() string {
 func (m Model) renderAccountInfo() string {
 	return fmt.Sprintf(
 		"%s\n%s\n%s",
-		m.renderKeyValue(
+		common_utils.RenderKeyValue(
 			"AccountId",
 			app_store.AppDataStore.Account.AccountId,
 		),
-		m.renderKeyValue(
+		common_utils.RenderKeyValue(
 			"Name",
 			app_store.AppDataStore.Account.Name,
 		),
-		m.renderKeyValue(
+		common_utils.RenderKeyValue(
 			"Email",
 			app_store.AppDataStore.Account.Email,
 		),
 	)
-}
-
-func (m Model) renderKeyValue(key string, value string) string {
-	return fmt.Sprintf("%s%s %s", styles.TextAccentColor.Render(key), styles.TextAccentColor.Render(":"), value)
 }
 
 func createTableColumns(tableWidth int) []table.Column {
