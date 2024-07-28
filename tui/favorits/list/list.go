@@ -13,8 +13,8 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
-	common "github.com/remshams/jira-control/tui/_common"
-	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
+	common "github.com/remshams/jira-control/tui/common"
+	common_worklog "github.com/remshams/jira-control/tui/common/worklog"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 )
 

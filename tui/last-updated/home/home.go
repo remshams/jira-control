@@ -3,7 +3,7 @@ package tui_last_updated
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/utils"
-	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
+	common_worklog "github.com/remshams/jira-control/tui/common/worklog"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	tui_last_updated_issue_list "github.com/remshams/jira-control/tui/last-updated/issue-list"
 	worklog_list "github.com/remshams/jira-control/tui/worklog/list"

@@ -9,9 +9,9 @@ import (
 	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/jira-control/jira/issue"
-	common "github.com/remshams/jira-control/tui/_common"
-	common_issue "github.com/remshams/jira-control/tui/_common/issue"
-	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
+	common "github.com/remshams/jira-control/tui/common"
+	common_issue "github.com/remshams/jira-control/tui/common/issue"
+	common_worklog "github.com/remshams/jira-control/tui/common/worklog"
 )
 
 type SwitchViewAction struct {

@@ -8,7 +8,7 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/textinput"
 	"github.com/remshams/common/tui/utils"
-	common "github.com/remshams/jira-control/tui/_common"
+	common "github.com/remshams/jira-control/tui/common"
 )
 
 type ApplySearchAction struct {

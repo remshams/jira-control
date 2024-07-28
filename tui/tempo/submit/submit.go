@@ -15,7 +15,7 @@ import (
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
-	common "github.com/remshams/jira-control/tui/_common"
+	common "github.com/remshams/jira-control/tui/common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
 	tempo_status "github.com/remshams/jira-control/tui/tempo/status"

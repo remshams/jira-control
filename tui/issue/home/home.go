@@ -3,7 +3,7 @@ package issue_home
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/remshams/common/tui/utils"
-	common_worklog "github.com/remshams/jira-control/tui/_common/worklog"
+	common_worklog "github.com/remshams/jira-control/tui/common/worklog"
 	issue_search_home "github.com/remshams/jira-control/tui/issue/search/home"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	worklog_list "github.com/remshams/jira-control/tui/worklog/list"
