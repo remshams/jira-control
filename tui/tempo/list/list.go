@@ -12,6 +12,7 @@ import (
 	title "github.com/remshams/common/tui/bubbles/page_title"
 	"github.com/remshams/common/tui/bubbles/spinner"
 	"github.com/remshams/common/tui/bubbles/table"
+	"github.com/remshams/common/tui/bubbles/toast"
 	"github.com/remshams/common/tui/styles"
 	"github.com/remshams/common/tui/utils"
 	jira "github.com/remshams/jira-control/jira/public"
@@ -24,6 +25,18 @@ type SwitchToSubmitViewAction struct{}
 
 func createSwitchToSubmitViewAction() tea.Msg {
 	return SwitchToSubmitViewAction{}
+}
+
+type SwitchToDeleteWorklogViewAction struct {
+	worklog jira.TempoWorklog
+}
+
+func createSwitchToDeleteWorklogViewAction(worklog jira.TempoWorklog) tea.Cmd {
+	return func() tea.Msg {
+		return SwitchToDeleteWorklogViewAction{
+			worklog: worklog,
+		}
+	}
 }
 
 type initAction struct{}
@@ -66,11 +79,13 @@ type WorklogListKeyMap struct {
 	help   help.KeyMap
 	table  table.KeyMap
 	submit key.Binding
+	delete key.Binding
 }
 
 func (m WorklogListKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
 		m.submit,
+		m.delete,
 		m.help.Help,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
@@ -90,6 +105,10 @@ var WorklogListKeys = WorklogListKeyMap{
 	submit: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "Submit timesheet"),
+	),
+	delete: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "Delete worklog"),
 	),
 }
 
@@ -177,6 +196,15 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, WorklogListKeys.submit):
 			cmd = createSwitchToSubmitViewAction
+		case key.Matches(msg, WorklogListKeys.delete):
+			worklog := m.findWorklog(m.table.SelectedRowCell(0))
+			if worklog != nil {
+				cmd = createSwitchToDeleteWorklogViewAction(*worklog)
+			} else {
+				cmd = toast.CreateErrorToastAction(fmt.Sprintf("Could not find worklog with id %d", worklog.Id))
+			}
+		default:
+			m.table, cmd = m.table.Update(msg)
 		}
 	default:
 		m.table, cmd = m.table.Update(msg)
@@ -226,4 +254,13 @@ func createTableRows(worklogs []jira.TempoWorklog) []table.Row {
 		})
 	}
 	return rows
+}
+
+func (m Model) findWorklog(id string) *jira.TempoWorklog {
+	for _, worklog := range m.worklogs {
+		if strconv.Itoa(worklog.Id) == id {
+			return &worklog
+		}
+	}
+	return nil
 }
