@@ -142,10 +142,14 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processDeleteUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case tempo_workloglistmodel.SwitchToWorklogListView:
 		m.state = stateLoading
-		cmd = m.createLoadTimesheetStatusAction()
+		if msg.Toast != nil {
+			cmd = tea.Batch(*msg.Toast, m.createLoadTimesheetStatusAction())
+		} else {
+			cmd = m.createLoadTimesheetStatusAction()
+		}
 	default:
 		m.delete, cmd = m.delete.Update(msg)
 	}

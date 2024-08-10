@@ -70,11 +70,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, WorklogDeleteKeys.yes):
 			error := m.worklog.Delete()
 			if error != nil {
-				cmd = toast.CreateErrorToastAction(fmt.Sprintf("Worklog with id %d could not be deleted", m.worklog.Id))
+				toast := toast.CreateErrorToastAction(fmt.Sprintf("Worklog with id %d could not be deleted", m.worklog.Id))
+				cmd = tea.Batch(tempo_workloglistmodel.CreateSwitchToWorklogListView(&toast), help.CreateResetKeyMapMsg())
 			}
-			cmd = tea.Batch(toast.CreateSuccessToastAction("Worklog deleted"), tempo_workloglistmodel.CreateSwitchToWorklogListView)
+			toast := toast.CreateSuccessToastAction("Worklog deleted")
+			cmd = tea.Batch(toast, help.CreateResetKeyMapMsg())
 		case key.Matches(msg, WorklogDeleteKeys.no):
-			cmd = tea.Batch(tempo_workloglistmodel.CreateSwitchToWorklogListView, help.CreateResetKeyMapMsg())
+			toast := toast.CreateInfoToastAction("Delete aborted")
+			cmd = tea.Batch(tempo_workloglistmodel.CreateSwitchToWorklogListView(&toast), help.CreateResetKeyMapMsg())
 		}
 	}
 	return m, cmd

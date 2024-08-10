@@ -1,11 +1,19 @@
 package tempo_workloglistmodel
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
 
-type SwitchToWorklogListView struct{}
+type SwitchToWorklogListView struct {
+	Toast *tea.Cmd
+}
 
-func CreateSwitchToWorklogListView() tea.Msg {
-	return SwitchToWorklogListView{}
+func CreateSwitchToWorklogListView(toast *tea.Cmd) tea.Cmd {
+	return func() tea.Msg {
+		return SwitchToWorklogListView{
+			Toast: toast,
+		}
+	}
 }
 
 type LoadWorklogListAction struct{}

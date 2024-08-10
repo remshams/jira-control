@@ -183,7 +183,7 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SubmitKeys.worklogList):
-			cmd = tempo_workloglistmodel.CreateSwitchToWorklogListView
+			cmd = tempo_workloglistmodel.CreateSwitchToWorklogListView(nil)
 		case key.Matches(msg, SubmitKeys.submit):
 			reviewerAccountId := m.table.SelectedRowCell(0)
 			err := m.timesheet.Submit(reviewerAccountId)
