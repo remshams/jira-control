@@ -2,8 +2,8 @@ package tempo_workloglistmodel
 
 import tea "github.com/charmbracelet/bubbletea"
 
-type SwitchWorklogListView struct{}
+type SwitchToWorklogListView struct{}
 
-func CreateSwitchWorklogListView() tea.Msg {
-	return SwitchWorklogListView{}
+func CreateSwitchToWorklogListView() tea.Msg {
+	return SwitchToWorklogListView{}
 }

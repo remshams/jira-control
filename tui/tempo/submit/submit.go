@@ -19,6 +19,7 @@ import (
 	common_utils "github.com/remshams/jira-control/tui/common/utils"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
+	tempo_workloglistmodel "github.com/remshams/jira-control/tui/tempo/model"
 	tempo_status "github.com/remshams/jira-control/tui/tempo/status"
 )
 
@@ -62,12 +63,6 @@ func (m Model) loadReviewers(reviewersChan chan []jira.User, errorChan chan erro
 	} else {
 		reviewersChan <- reviewers
 	}
-}
-
-type SwitchToWorklogListView struct{}
-
-func createSwitchToWorklogListView() tea.Msg {
-	return SwitchToWorklogListView{}
 }
 
 type SubmitKeymap struct {
@@ -188,7 +183,7 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, SubmitKeys.worklogList):
-			cmd = createSwitchToWorklogListView
+			cmd = tempo_workloglistmodel.CreateSwitchToWorklogListView
 		case key.Matches(msg, SubmitKeys.submit):
 			reviewerAccountId := m.table.SelectedRowCell(0)
 			err := m.timesheet.Submit(reviewerAccountId)

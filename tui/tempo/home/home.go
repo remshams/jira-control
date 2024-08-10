@@ -128,7 +128,7 @@ func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg.(type) {
-	case tempo_submit.SwitchToWorklogListView:
+	case tempo_workloglistmodel.SwitchToWorklogListView:
 		m.state = stateWorklog
 		m.worklogList, cmd = m.worklogList.Init(m.timesheet, m.timesheetStatus)
 	default:
@@ -140,7 +140,7 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 func (m *Model) processDeleteUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg.(type) {
-	case tempo_workloglistmodel.SwitchWorklogListView:
+	case tempo_workloglistmodel.SwitchToWorklogListView:
 		m.state = stateLoading
 		cmd = m.createLoadTimesheetStatusAction()
 	default:
