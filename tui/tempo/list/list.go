@@ -18,6 +18,7 @@ import (
 	jira "github.com/remshams/jira-control/jira/public"
 	common "github.com/remshams/jira-control/tui/common"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
+	tempo_workloglistmodel "github.com/remshams/jira-control/tui/tempo/model"
 	tempo_status "github.com/remshams/jira-control/tui/tempo/status"
 )
 
@@ -80,12 +81,14 @@ type WorklogListKeyMap struct {
 	table  table.KeyMap
 	submit key.Binding
 	delete key.Binding
+	reload key.Binding
 }
 
 func (m WorklogListKeyMap) ShortHelp() []key.Binding {
 	shortHelp := []key.Binding{
 		m.submit,
 		m.delete,
+		m.reload,
 		m.help.Help,
 	}
 	return append(shortHelp, m.global.KeyBindings()...)
@@ -109,6 +112,10 @@ var WorklogListKeys = WorklogListKeyMap{
 	delete: key.NewBinding(
 		key.WithKeys("d"),
 		key.WithHelp("d", "Delete worklog"),
+	),
+	reload: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "Reload worklogs"),
 	),
 }
 
@@ -203,6 +210,8 @@ func (m *Model) processLoadedUpdate(msg tea.Msg) tea.Cmd {
 			} else {
 				cmd = toast.CreateErrorToastAction(fmt.Sprintf("Could not find worklog with id %d", worklog.Id))
 			}
+		case key.Matches(msg, WorklogListKeys.reload):
+			cmd = tempo_workloglistmodel.CreateLoadWorklogListAction
 		default:
 			m.table, cmd = m.table.Update(msg)
 		}

@@ -7,3 +7,9 @@ type SwitchToWorklogListView struct{}
 func CreateSwitchToWorklogListView() tea.Msg {
 	return SwitchToWorklogListView{}
 }
+
+type LoadWorklogListAction struct{}
+
+func CreateLoadWorklogListAction() tea.Msg {
+	return LoadWorklogListAction{}
+}

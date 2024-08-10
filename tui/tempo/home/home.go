@@ -119,6 +119,9 @@ func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	case tempo_workloglist.SwitchToDeleteWorklogViewAction:
 		m.state = stateDelete
 		cmd = m.delete.Init(msg.Worklog)
+	case tempo_workloglistmodel.LoadWorklogListAction:
+		m.state = stateLoading
+		cmd = m.createLoadTimesheetStatusAction()
 	default:
 		m.worklogList, cmd = m.worklogList.Update(msg)
 	}
