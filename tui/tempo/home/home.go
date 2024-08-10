@@ -9,6 +9,7 @@ import (
 	app_store "github.com/remshams/jira-control/tui/store"
 	tempo_worklogdelete "github.com/remshams/jira-control/tui/tempo/delete"
 	tempo_workloglist "github.com/remshams/jira-control/tui/tempo/list"
+	tempo_workloglistmodel "github.com/remshams/jira-control/tui/tempo/model"
 	tempo_submit "github.com/remshams/jira-control/tui/tempo/submit"
 )
 
@@ -117,7 +118,7 @@ func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 		m.submit, cmd = m.submit.Init(m.timesheet, m.timesheetStatus)
 	case tempo_workloglist.SwitchToDeleteWorklogViewAction:
 		m.state = stateDelete
-		m.delete.Init(msg.Worklog)
+		cmd = m.delete.Init(msg.Worklog)
 	default:
 		m.worklogList, cmd = m.worklogList.Update(msg)
 	}
@@ -138,7 +139,13 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processDeleteUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	m.delete, cmd = m.delete.Update(msg)
+	switch msg.(type) {
+	case tempo_workloglistmodel.SwitchWorklogListView:
+		m.state = stateLoading
+		cmd = m.createLoadTimesheetStatusAction()
+	default:
+		m.delete, cmd = m.delete.Update(msg)
+	}
 	return cmd
 }
 
