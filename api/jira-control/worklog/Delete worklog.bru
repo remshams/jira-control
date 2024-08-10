@@ -1,0 +1,15 @@
+meta {
+  name: Delete worklog
+  type: http
+  seq: 4
+}
+
+delete {
+  url: https://api.tempo.io/4/worklogs/85479
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tempo-api-token}}
+}
