@@ -7,6 +7,7 @@ import (
 	jira "github.com/remshams/jira-control/jira/public"
 	tui_jira "github.com/remshams/jira-control/tui/jira"
 	app_store "github.com/remshams/jira-control/tui/store"
+	tempo_worklogdelete "github.com/remshams/jira-control/tui/tempo/delete"
 	tempo_workloglist "github.com/remshams/jira-control/tui/tempo/list"
 	tempo_submit "github.com/remshams/jira-control/tui/tempo/submit"
 )
@@ -45,6 +46,7 @@ func (m Model) loadTimesheetStatus(statusChan chan jira.TimesheetStatus, errorCh
 const (
 	stateWorklog      utils.ViewState = "worklog"
 	stateSubmit       utils.ViewState = "submit"
+	stateDelete       utils.ViewState = "delete"
 	stateLoading      utils.ViewState = "loading"
 	stateLoadingError utils.ViewState = "loadingError"
 )
@@ -52,6 +54,7 @@ const (
 type Model struct {
 	worklogList     tempo_workloglist.Model
 	submit          tempo_submit.Model
+	delete          tempo_worklogdelete.Model
 	adapter         tui_jira.JiraAdapter
 	timesheet       jira.Timesheet
 	timesheetStatus jira.TimesheetStatus
@@ -64,6 +67,7 @@ func New(adapter tui_jira.JiraAdapter) Model {
 		adapter:     adapter,
 		worklogList: tempo_workloglist.New(adapter),
 		submit:      tempo_submit.New(adapter),
+		delete:      tempo_worklogdelete.New(),
 		state:       stateLoading,
 		spinner:     spinner.New().WithLabel("Loading timesheet"),
 	}
@@ -83,6 +87,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmd = m.processWorklogListUpdate(msg)
 	case stateSubmit:
 		cmd = m.processSubmitUpdate(msg)
+	case stateDelete:
+		cmd = m.processDeleteUpdate(msg)
 	}
 	return m, cmd
 }
@@ -105,10 +111,13 @@ func (m *Model) processLoadingUpdate(msg tea.Msg) tea.Cmd {
 
 func (m *Model) processWorklogListUpdate(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case tempo_workloglist.SwitchToSubmitViewAction:
 		m.state = stateSubmit
 		m.submit, cmd = m.submit.Init(m.timesheet, m.timesheetStatus)
+	case tempo_workloglist.SwitchToDeleteWorklogViewAction:
+		m.state = stateDelete
+		m.delete.Init(msg.Worklog)
 	default:
 		m.worklogList, cmd = m.worklogList.Update(msg)
 	}
@@ -127,6 +136,12 @@ func (m *Model) processSubmitUpdate(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
+func (m *Model) processDeleteUpdate(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	m.delete, cmd = m.delete.Update(msg)
+	return cmd
+}
+
 func (m Model) View() string {
 	switch m.state {
 	case stateLoading:
@@ -135,6 +150,8 @@ func (m Model) View() string {
 		return m.worklogList.View()
 	case stateSubmit:
 		return m.submit.View()
+	case stateDelete:
+		return m.delete.View()
 	case stateLoadingError:
 		return "Error loading timesheet"
 	default:

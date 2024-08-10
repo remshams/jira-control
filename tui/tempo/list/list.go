@@ -28,13 +28,13 @@ func createSwitchToSubmitViewAction() tea.Msg {
 }
 
 type SwitchToDeleteWorklogViewAction struct {
-	worklog jira.TempoWorklog
+	Worklog jira.TempoWorklog
 }
 
 func createSwitchToDeleteWorklogViewAction(worklog jira.TempoWorklog) tea.Cmd {
 	return func() tea.Msg {
 		return SwitchToDeleteWorklogViewAction{
-			worklog: worklog,
+			Worklog: worklog,
 		}
 	}
 }
