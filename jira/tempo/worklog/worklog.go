@@ -58,6 +58,7 @@ type WorklogListAdapter interface {
 }
 
 type Worklog struct {
+	adapter          WorklogListAdapter
 	IssueKey         int
 	Id               int
 	TimeSpentSeconds int
@@ -66,8 +67,9 @@ type Worklog struct {
 	Description      string
 }
 
-func NewWorklog(issueKey int, id int, timeSpentSeconds int, billableSeconds int, start time.Time, description string) Worklog {
+func NewWorklog(adapter WorklogListAdapter, issueKey int, id int, timeSpentSeconds int, billableSeconds int, start time.Time, description string) Worklog {
 	return Worklog{
+		adapter:          adapter,
 		IssueKey:         issueKey,
 		Id:               id,
 		TimeSpentSeconds: timeSpentSeconds,
@@ -75,4 +77,8 @@ func NewWorklog(issueKey int, id int, timeSpentSeconds int, billableSeconds int,
 		Start:            start,
 		Description:      description,
 	}
+}
+
+func (w Worklog) Delete() error {
+	return w.adapter.Delete(w.Id)
 }

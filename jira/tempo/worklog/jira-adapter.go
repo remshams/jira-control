@@ -35,12 +35,13 @@ type worklogDto struct {
 	Description      string          `json:"description"`
 }
 
-func (w worklogDto) toWorklog() (*Worklog, error) {
+func (w worklogDto) toWorklog(adapter WorklogListAdapter) (*Worklog, error) {
 	start, err := utils.TempoDateToTime(w.StartDate, w.StartTime)
 	if err != nil {
 		return nil, err
 	}
 	worklog := NewWorklog(
+		adapter,
 		w.Issue.Id,
 		w.TempoWorklogId,
 		w.TimeSpentSeconds,
@@ -56,10 +57,10 @@ type worklogResponseDto struct {
 	Results  []worklogDto               `json:"results"`
 }
 
-func (w worklogResponseDto) toWorklogs() ([]Worklog, error) {
+func (w worklogResponseDto) toWorklogs(adapter WorklogListAdapter) ([]Worklog, error) {
 	worklogs := []Worklog{}
 	for _, worklogDto := range w.Results {
-		worklog, err := worklogDto.toWorklog()
+		worklog, err := worklogDto.toWorklog(adapter)
 		if err != nil {
 			return []Worklog{}, err
 		}
@@ -118,7 +119,7 @@ func (w JiraWorklogAdapter) List(query WorklogListQuery) ([]Worklog, error) {
 		log.Error("Could not parse json result")
 		return []Worklog{}, err
 	}
-	worklogs, err := worklogResponseDto.toWorklogs()
+	worklogs, err := worklogResponseDto.toWorklogs(w)
 	if err != nil {
 		log.Error("Could not parse worklogs: %v", worklogs)
 	}
